@@ -3,7 +3,7 @@
 Connect your FIAT (uconnect) car to Home Assistant. Needs a car with uconnect services enabled and valid fiat account.
 
 I have created this addon for my own car (new Fiat Icon 500e) and its the only one i can test it with. 
-This addon is work in progress so expect some bugs. 😅
+Work in progress so expect some bugs. 😅
 
 Example dashboard using sensors and entities provided by this addon:
 
