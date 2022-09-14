@@ -1,0 +1,6 @@
+bin
+obj
+build
+build_*
+.idea
+Folder.DotSettings.user

@@ -1,0 +1,24 @@
+name: "FiatChamp"
+description: "Connect your FIAT (uconnect) car to your Home Assistant. 🚗"
+services:
+    - "mqtt:need"
+version: "1.0.52"
+slug: "fiat_champ"
+init: false
+discovery: 
+    - "mqtt"
+options:
+  FiatUser: ""
+  FiatPw: ""
+  FiatPin: ""
+  RefreshInterval: 15
+  Debug: false
+schema:
+  FiatUser: str
+  FiatPw: password
+  FiatPin: password?
+  RefreshInterval: int
+  Debug: bool
+arch:
+  - amd64
+  - armv7

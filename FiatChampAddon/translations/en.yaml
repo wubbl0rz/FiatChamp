@@ -1,0 +1,14 @@
+---
+configuration:
+  FiatUser:
+    name: Login user
+    description: Your fiat uconnect user.
+  FiatPw:
+    name: Password
+    description: Your fiat uconnect password.
+  FiatPin:
+    name: Pin
+    description: Your PIN. Used for sending commands to the car.
+  RefreshInterval:
+    name: Refresh interval
+    description: Fetch new data from api every N minutes.

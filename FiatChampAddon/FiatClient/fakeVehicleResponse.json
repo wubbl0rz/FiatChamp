@@ -1,0 +1,26 @@
+
+{
+  "Userid": "IDKEKL",
+  "Version": 1692481518267,
+  "Vehicles": [
+    {
+      "RegStatus": "COMPLETED_STAGE_3",
+      "Color": "CUTE",
+      "Year": 2022,
+      "TsoBodyCode": "",
+      "NavEnabledHu": false,
+      "Language": "",
+      "CustomerRegStatus": "Y",
+      "Radio": "",
+      "ActivationSource": "DEALER",
+      "Nickname": "",
+      "Vin": "OMEGALULID123456789",
+      "Company": "FCA",
+      "Model": 332,
+      "TcuType": 2,
+      "Make": "FIAT",
+      "BrandCode": "00",
+      "SoldRegion": "EMEA"
+    }
+  ]
+}
