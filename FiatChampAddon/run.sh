@@ -11,8 +11,8 @@ export FiatChamp_FiatPin=$(bashio::config 'FiatPin')
 
 DEBUG=$(bashio::config 'Debug')
 
-DOTNET_CLI_TELEMETRY_OPTOUT=1
-DOTNET_NOLOGO=1
+export DOTNET_CLI_TELEMETRY_OPTOUT=1
+export DOTNET_NOLOGO=1
 
 cd /FiatClient/
 

@@ -1,5 +1,5 @@
 name: "FiatChamp"
-description: "Connect your FIAT (uconnect) car to your Home Assistant. 🚗"
+description: "Connect your FIAT (uconnect) car to Home Assistant. 🚗"
 services:
     - "mqtt:need"
 version: "1.0.52"
