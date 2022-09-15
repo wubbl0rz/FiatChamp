@@ -2,6 +2,7 @@
 using Cocona;
 using FiatChamp;
 using FiatChamp.HA;
+using Flurl.Http;
 using Microsoft.Extensions.Configuration;
 
 // TODO: session handling / timeout and location refresh
@@ -47,18 +48,18 @@ await app.RunAsync(async (IConfiguration config, CoconaAppContext ctx) =>
   while (!ctx.CancellationToken.IsCancellationRequested)
   {
     Console.WriteLine($"FETCH DATA... {DateTime.Now}");
-    
+
     try
     {
-      var fiatClient = new FiatClient(envOptions.FiatUser,envOptions.FiatPw);
+      var fiatClient = new FiatClient(envOptions.FiatUser, envOptions.FiatPw);
       await fiatClient.Login();
-      
+
       var vehicles = await fiatClient.Fetch();
-  
+
       foreach (var vehicle in vehicles)
       {
         var vehicleName = string.IsNullOrEmpty(vehicle.Nickname) ? "Car" : vehicle.Nickname;
-  
+
         var haDevice = new HaDevice()
         {
           Name = vehicleName,
@@ -67,41 +68,48 @@ await app.RunAsync(async (IConfiguration config, CoconaAppContext ctx) =>
           Model = vehicle.ModelDescription,
           Version = "1.0"
         };
-  
+
         var tracker = new HaDeviceTracker(mqttClient, "CAR_LOCATION", haDevice);
-  
+
         tracker.Lat = vehicle.Location.Latitude;
         tracker.Lon = vehicle.Location.Longitude;
-  
+
         await tracker.Announce();
         await tracker.PublishState();
-  
+
         var compactDetails = vehicle.Details.Compact("car");
-        
+
         await Parallel.ForEachAsync(compactDetails, async (sensorData, token) =>
         {
           var sensor = new HaSensor(mqttClient, sensorData.Key, haDevice)
           {
             Value = sensorData.Value
           };
-          
+
           await sensor.Announce();
           await sensor.PublishState();
         });
-        
+
         TrySetupCommandsForVehicle(vehicle, haDevice);
-        
+
         foreach (var haEntity in haEntities.Values.SelectMany(a => a))
         {
           await haEntity.Announce();
         }
       }
     }
+    catch (FlurlHttpException httpException)
+    {
+      Console.WriteLine($"Error connecting to the FIAT API. StatusCode: {httpException.StatusCode}" +
+                        "This can happen from time to time. Retrying in 15 minutes.");
+      
+      httpException.Message.Dump();
+    }
     catch (Exception e)
     {
       Console.WriteLine(e);
     }
-    
+
     await Task.Delay(TimeSpan.FromMinutes(15), ctx.CancellationToken);
   }
   
