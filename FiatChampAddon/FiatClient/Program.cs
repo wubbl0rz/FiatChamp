@@ -6,8 +6,12 @@ using Flurl.Http;
 using Microsoft.Extensions.Configuration;
 
 // TODO: session handling / timeout and location refresh
-// TODO: ha addon. debug mode. debug print. experimental flag. update interval. pin on button press ?
-// TODO: mqtt tls or not ?
+// TODO: use ilogger interface. debug print.
+// TODO: experimental flag in settings for commands.
+// TODO: make update interval configurable.
+// TODO: enter pin on button press for commands ?
+// TODO: support mqtt tls
+// TODO: use new AwsSignatureHandler ?
 
 var builder = CoconaApp.CreateBuilder();
 builder.Configuration.AddEnvironmentVariables("FiatChamp_");
@@ -22,27 +26,27 @@ await app.RunAsync(async (IConfiguration config, CoconaAppContext ctx) =>
   {
     throw new Exception("FiatUser NOT FOUND");
   }
-  
+
   if (string.IsNullOrWhiteSpace(envOptions.FiatPw))
   {
     throw new Exception("FiatPw NOT FOUND");
   }
-  
-  if (string.IsNullOrWhiteSpace(envOptions.MqttServer) || 
-      string.IsNullOrWhiteSpace(envOptions.MqttUser) || 
-      string.IsNullOrWhiteSpace(envOptions.MqttPw) || 
+
+  if (string.IsNullOrWhiteSpace(envOptions.MqttServer) ||
+      string.IsNullOrWhiteSpace(envOptions.MqttUser) ||
+      string.IsNullOrWhiteSpace(envOptions.MqttPw) ||
       envOptions.MqttPort is null or 0)
   {
     throw new Exception("Mqtt settings not found.");
   }
-  
-  var mqttClient = new SimpleMqttClient(envOptions.MqttServer, 
-    envOptions.MqttPort, 
-    envOptions.MqttUser, 
-    envOptions.MqttPw, 
+
+  var mqttClient = new SimpleMqttClient(envOptions.MqttServer,
+    envOptions.MqttPort,
+    envOptions.MqttUser,
+    envOptions.MqttPw,
     "FiatChamp");
   await mqttClient.Connect();
-  
+
   var haEntities = new ConcurrentDictionary<string, HaEntity[]>();
 
   while (!ctx.CancellationToken.IsCancellationRequested)
@@ -100,9 +104,9 @@ await app.RunAsync(async (IConfiguration config, CoconaAppContext ctx) =>
     }
     catch (FlurlHttpException httpException)
     {
-      Console.WriteLine($"Error connecting to the FIAT API. StatusCode: {httpException.StatusCode}" +
+      Console.WriteLine($"Error connecting to the FIAT API. \n" +
                         "This can happen from time to time. Retrying in 15 minutes.");
-      
+
       httpException.Message.Dump();
     }
     catch (Exception e)
@@ -112,24 +116,24 @@ await app.RunAsync(async (IConfiguration config, CoconaAppContext ctx) =>
 
     await Task.Delay(TimeSpan.FromMinutes(15), ctx.CancellationToken);
   }
-  
+
   bool TrySetupCommandsForVehicle(Vehicle vehicle, HaDevice haDevice)
   {
     if (haEntities.ContainsKey(vehicle.Vin))
       return false;
-    
-    var updateLocationButton = new 
+
+    var updateLocationButton = new
       HaButton(mqttClient, "UpdateLocation", haDevice, async button => { Console.WriteLine("VF"); });
-  
+
     var deepRefreshButton = new
       HaButton(mqttClient, "DeepRefresh", haDevice, async button => { Console.WriteLine("DEEPREFRESH"); });
-    
-    var locateLightsButton = new 
+
+    var locateLightsButton = new
       HaButton(mqttClient, "Blink", haDevice, async button => { Console.WriteLine("HBLF"); });
-  
+
     var chargeNowButton = new
       HaButton(mqttClient, "ChargeNOW", haDevice, async button => { Console.WriteLine("CNOW"); });
-    
+
     var trunkSwitch = new HaSwitch(mqttClient, "Trunk", haDevice, async sw =>
     {
       if (sw.IsOn)
@@ -141,7 +145,7 @@ await app.RunAsync(async (IConfiguration config, CoconaAppContext ctx) =>
         Console.WriteLine("ROTRUNKLOCK");
       }
     });
-  
+
     var hvacSwitch = new HaSwitch(mqttClient, "HVAC", haDevice, async sw =>
     {
       if (sw.IsOn)
@@ -153,7 +157,7 @@ await app.RunAsync(async (IConfiguration config, CoconaAppContext ctx) =>
         Console.WriteLine("ROPRECOND_OFF");
       }
     });
-    
+
     haEntities.TryAdd(vehicle.Vin, new HaEntity[]
     {
       hvacSwitch,
@@ -163,7 +167,7 @@ await app.RunAsync(async (IConfiguration config, CoconaAppContext ctx) =>
       locateLightsButton,
       updateLocationButton
     });
-  
+
     return true;
   }
 });

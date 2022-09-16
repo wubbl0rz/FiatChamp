@@ -8,16 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aws4RequestSigner" Version="1.0.3" />
-    <PackageReference Include="AWSSDK.APIGateway" Version="3.7.3.56" />
     <PackageReference Include="AWSSDK.CognitoIdentity" Version="3.7.0.200" />
-    <PackageReference Include="AWSSDK.Core" Version="3.7.12.29" />
-    <PackageReference Include="AWSSDK.Signer" Version="3.7.0.200" />
     <PackageReference Include="AwsSignatureVersion4" Version="4.0.0" />
     <PackageReference Include="Cocona" Version="2.0.3" />
     <PackageReference Include="Flurl.Http" Version="3.2.4" />
     <PackageReference Include="MQTTnet" Version="4.1.0.247" />
     <PackageReference Include="MQTTnet.Extensions.ManagedClient" Version="4.1.0.247" />
+    <PackageReference Include="Polly" Version="7.2.3" />
   </ItemGroup>
 
   <ItemGroup>

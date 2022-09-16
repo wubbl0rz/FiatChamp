@@ -1,9 +1,11 @@
 using Amazon;
 using Amazon.CognitoIdentity;
 using Amazon.Runtime;
+using AwsSignatureVersion4;
 using FiatChamp;
 using Flurl;
 using Flurl.Http;
+using Flurl.Http.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -21,16 +23,23 @@ public class FiatClient
 
   private ImmutableCredentials? _credentials;
   private string? _authUID;
+  private readonly IFlurlClient _defaultHttpClient;
 
   public FiatClient(string user, string password)
   {
     _user = user;
     _password = password;
+
+    _defaultHttpClient = new FlurlClient().Configure(settings =>
+    {
+      settings.HttpClientFactory = new PollyHttpClientFactory();
+    });
   }
 
   public async Task Login()
   {
     var loginResponse = await _loginUrl
+      .WithClient(_defaultHttpClient)
       .AppendPathSegment("accounts.webSdkBootstrap")
       .SetQueryParam("apiKey", _loginApiKey)
       .WithCookies(_cookieJar)
@@ -41,6 +50,7 @@ public class FiatClient
     loginResponse.ThrowOnError("Login failed.");
 
     var authResponse = await _loginUrl
+      .WithClient(_defaultHttpClient)
       .AppendPathSegment("accounts.login")
       .WithCookies(_cookieJar)
       .PostUrlEncodedAsync(
@@ -60,6 +70,7 @@ public class FiatClient
     _authUID = authResponse.UID;
 
     var jwtResponse = await _loginUrl
+      .WithClient(_defaultHttpClient)
       .AppendPathSegment("accounts.getJWT")
       .SetQueryParams(
         WithFiatDefaultParameter(new()
@@ -73,8 +84,9 @@ public class FiatClient
     jwtResponse.Dump();
 
     jwtResponse.ThrowOnError("Authentication failed.");
-    
+
     var identityResponse = await _tokenUrl
+      .WithClient(_defaultHttpClient)
       .WithHeader("content-type", "application/json")
       .WithHeaders(WithAwsDefaultParameter())
       .PostJsonAsync(new
@@ -84,7 +96,7 @@ public class FiatClient
       .ReceiveJson<FcaIdentityResponse>();
 
     identityResponse.ThrowOnError("Identity failed.");
-    
+
     identityResponse.Dump();
 
     var client = new AmazonCognitoIdentityClient(new AnonymousAWSCredentials(), RegionEndpoint.EUWest1);
@@ -94,12 +106,12 @@ public class FiatClient
       {
         { "cognito-identity.amazonaws.com", identityResponse.Token }
       });
-    
+
     _credentials = new ImmutableCredentials(res.Credentials.AccessKeyId,
       res.Credentials.SecretKey,
       res.Credentials.SessionToken);
   }
-  
+
   private Dictionary<string, object> WithAwsDefaultParameter(Dictionary<string, object>? parameters = null)
   {
     var dict = new Dictionary<string, object>()
@@ -138,44 +150,47 @@ public class FiatClient
   public async Task Set(string vin, string action)
   {
   }
-  
+
   public async Task<Vehicle[]> Fetch()
   {
     ArgumentNullException.ThrowIfNull(_credentials);
     ArgumentNullException.ThrowIfNull(_authUID);
-    
+
     var vehicleResponse = await _apiUrl
+      .WithClient(_defaultHttpClient)
       .AppendPathSegments("v4", "accounts", _authUID, "vehicles")
       .SetQueryParam("stage", "ALL")
       .WithHeaders(WithAwsDefaultParameter())
       .AwsSign(_credentials)
       .GetJsonAsync<VehicleResponse>();
-    
+
     vehicleResponse.Dump();
-    
+
     foreach (var vehicle in vehicleResponse.Vehicles)
     {
       var vehicleDetails = await _apiUrl
+        .WithClient(_defaultHttpClient)
         .AppendPathSegments("v2", "accounts", _authUID, "vehicles", vehicleResponse.Vehicles.First().Vin, "status")
         .WithHeaders(WithAwsDefaultParameter())
         .AwsSign(_credentials)
         .GetJsonAsync<JObject>();
-    
+
       vehicleDetails.Dump();
-    
+
       vehicle.Details = vehicleDetails;
-    
+
       var vehicleLocation = await _apiUrl
+        .WithClient(_defaultHttpClient)
         .AppendPathSegments("v1", "accounts", _authUID, "vehicles", vehicle.Vin, "location", "lastknown")
         .WithHeaders(WithAwsDefaultParameter())
         .AwsSign(_credentials)
         .GetJsonAsync<VehicleLocation>();
-    
+
       vehicle.Location = vehicleLocation;
-      
+
       vehicleLocation.Dump();
     }
-    
+
     return vehicleResponse.Vehicles;
   }
 }
