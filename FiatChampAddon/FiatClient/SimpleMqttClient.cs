@@ -1,6 +1,7 @@
 using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Extensions.ManagedClient;
+using MQTTnet.Protocol;
 
 namespace FiatChamp;
 
@@ -54,7 +55,14 @@ public class SimpleMqttClient
 
       if (msg.Topic == topic)
       {
-        await callback(msg.ConvertPayloadToString());
+        try
+        {
+          await callback(msg.ConvertPayloadToString());
+        }
+        catch (Exception e)
+        {
+          Console.WriteLine(e);
+        }
       }
     };
 

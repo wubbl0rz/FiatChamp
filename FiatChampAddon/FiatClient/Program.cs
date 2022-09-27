@@ -4,79 +4,72 @@ using FiatChamp;
 using FiatChamp.HA;
 using Flurl.Http;
 using Microsoft.Extensions.Configuration;
-
-// TODO: session handling / timeout and location refresh
-// TODO: use ilogger interface. debug print.
-// TODO: experimental flag in settings for commands.
-// TODO: make update interval configurable.
-// TODO: enter pin on button press for commands ?
-// TODO: support mqtt tls
-// TODO: use new AwsSignatureHandler ?
+using Microsoft.Extensions.DependencyInjection;
 
 var builder = CoconaApp.CreateBuilder();
+
 builder.Configuration.AddEnvironmentVariables("FiatChamp_");
+builder.Services.AddOptions<AppConfig>()
+  .Bind(builder.Configuration)
+  .ValidateDataAnnotations()
+  .ValidateOnStart();
 
 var app = builder.Build();
 
-await app.RunAsync(async (IConfiguration config, CoconaAppContext ctx) =>
+var persistentHaEntities = new ConcurrentDictionary<string, IEnumerable<HaEntity>>();
+var appConfig = builder.Configuration.Get<AppConfig>();
+var forceLoopResetEvent = new AutoResetEvent(false);
+
+await app.RunAsync(async (CoconaAppContext ctx) =>
 {
-  var envOptions = config.Get<EnvOptions>();
+  var fiatClient = new FiatClient(appConfig.FiatUser, appConfig.FiatPw);
 
-  if (string.IsNullOrWhiteSpace(envOptions.FiatUser))
-  {
-    throw new Exception("FiatUser NOT FOUND");
-  }
+  var mqttClient = new SimpleMqttClient(appConfig.MqttServer,
+    appConfig.MqttPort,
+    appConfig.MqttUser,
+    appConfig.MqttPw,
+    appConfig.DevMode ? "FiatChampDEV" : "FiatChamp");
 
-  if (string.IsNullOrWhiteSpace(envOptions.FiatPw))
-  {
-    throw new Exception("FiatPw NOT FOUND");
-  }
-
-  if (string.IsNullOrWhiteSpace(envOptions.MqttServer) ||
-      string.IsNullOrWhiteSpace(envOptions.MqttUser) ||
-      string.IsNullOrWhiteSpace(envOptions.MqttPw) ||
-      envOptions.MqttPort is null or 0)
-  {
-    throw new Exception("Mqtt settings not found.");
-  }
-
-  var mqttClient = new SimpleMqttClient(envOptions.MqttServer,
-    envOptions.MqttPort,
-    envOptions.MqttUser,
-    envOptions.MqttPw,
-    "FiatChamp");
   await mqttClient.Connect();
-
-  var haEntities = new ConcurrentDictionary<string, HaEntity[]>();
 
   while (!ctx.CancellationToken.IsCancellationRequested)
   {
     Console.WriteLine($"FETCH DATA... {DateTime.Now}");
-
+    
     try
     {
-      var fiatClient = new FiatClient(envOptions.FiatUser, envOptions.FiatPw);
-      await fiatClient.Login();
+      await fiatClient.LoginAndKeepSessionAlive();
 
-      var vehicles = await fiatClient.Fetch();
-
-      foreach (var vehicle in vehicles)
+      foreach (var vehicle in await fiatClient.Fetch())
       {
+        //todo: das läuft nu auch bei refresh loop auslagern in eigene loop
+        if (appConfig.AutoRefreshBattery)
+        {
+          await TrySendCommand(fiatClient, FiatCommands.DEEPREFRESH, vehicle.Vin);
+        }
+        
+        if (appConfig.AutoRefreshLocation)
+        {
+          await TrySendCommand(fiatClient, FiatCommands.DEEPREFRESH, vehicle.Vin);
+        }
+        
         var vehicleName = string.IsNullOrEmpty(vehicle.Nickname) ? "Car" : vehicle.Nickname;
+        var suffix = appConfig.DevMode ? "DEV" : "";
 
         var haDevice = new HaDevice()
         {
-          Name = vehicleName,
-          Identifier = vehicle.Vin,
+          Name = vehicleName + suffix,
+          Identifier = vehicle.Vin + suffix,
           Manufacturer = vehicle.Make,
           Model = vehicle.ModelDescription,
           Version = "1.0"
         };
 
-        var tracker = new HaDeviceTracker(mqttClient, "CAR_LOCATION", haDevice);
-
-        tracker.Lat = vehicle.Location.Latitude;
-        tracker.Lon = vehicle.Location.Longitude;
+        var tracker = new HaDeviceTracker(mqttClient, "CAR_LOCATION", haDevice)
+        {
+          Lat = vehicle.Location.Latitude,
+          Lon = vehicle.Location.Longitude
+        };
 
         await tracker.Announce();
         await tracker.PublishState();
@@ -94,9 +87,14 @@ await app.RunAsync(async (IConfiguration config, CoconaAppContext ctx) =>
           await sensor.PublishState();
         });
 
-        TrySetupCommandsForVehicle(vehicle, haDevice);
+        if (!persistentHaEntities.ContainsKey(vehicle.Vin))
+        {
+          var entities = CreateEntities(fiatClient, mqttClient, vehicle, haDevice);
 
-        foreach (var haEntity in haEntities.Values.SelectMany(a => a))
+          persistentHaEntities.TryAdd(vehicle.Vin, entities);
+        }
+
+        foreach (var haEntity in persistentHaEntities.Values.SelectMany(entities => entities))
         {
           await haEntity.Announce();
         }
@@ -105,79 +103,105 @@ await app.RunAsync(async (IConfiguration config, CoconaAppContext ctx) =>
     catch (FlurlHttpException httpException)
     {
       Console.WriteLine($"Error connecting to the FIAT API. \n" +
-                        "This can happen from time to time. Retrying in 15 minutes.");
+                        $"This can happen from time to time. Retrying in {appConfig.RefreshInterval} minutes.");
 
       httpException.Message.Dump();
     }
     catch (Exception e)
     {
-      Console.WriteLine(e);
+      Console.WriteLine(e.Message);
     }
 
-    await Task.Delay(TimeSpan.FromMinutes(15), ctx.CancellationToken);
-  }
-
-  bool TrySetupCommandsForVehicle(Vehicle vehicle, HaDevice haDevice)
-  {
-    if (haEntities.ContainsKey(vehicle.Vin))
-      return false;
-
-    var updateLocationButton = new
-      HaButton(mqttClient, "UpdateLocation", haDevice, async button => { Console.WriteLine("VF"); });
-
-    var deepRefreshButton = new
-      HaButton(mqttClient, "DeepRefresh", haDevice, async button => { Console.WriteLine("DEEPREFRESH"); });
-
-    var locateLightsButton = new
-      HaButton(mqttClient, "Blink", haDevice, async button => { Console.WriteLine("HBLF"); });
-
-    var chargeNowButton = new
-      HaButton(mqttClient, "ChargeNOW", haDevice, async button => { Console.WriteLine("CNOW"); });
-
-    var trunkSwitch = new HaSwitch(mqttClient, "Trunk", haDevice, async sw =>
+    if (WaitHandle.WaitTimeout !=
+        WaitHandle.WaitAny(new[]
+          {
+            ctx.CancellationToken.WaitHandle,
+            forceLoopResetEvent
+          },
+          TimeSpan.FromMinutes(appConfig.RefreshInterval)))
     {
-      if (sw.IsOn)
-      {
-        Console.WriteLine("ROTRUNKUNLOCK");
-      }
-      else
-      {
-        Console.WriteLine("ROTRUNKLOCK");
-      }
-    });
-
-    var hvacSwitch = new HaSwitch(mqttClient, "HVAC", haDevice, async sw =>
-    {
-      if (sw.IsOn)
-      {
-        Console.WriteLine("ROPRECOND");
-      }
-      else
-      {
-        Console.WriteLine("ROPRECOND_OFF");
-      }
-    });
-
-    haEntities.TryAdd(vehicle.Vin, new HaEntity[]
-    {
-      hvacSwitch,
-      trunkSwitch,
-      chargeNowButton,
-      deepRefreshButton,
-      locateLightsButton,
-      updateLocationButton
-    });
-
-    return true;
+      await Task.Delay(TimeSpan.FromSeconds(10), ctx.CancellationToken);
+    }
   }
 });
 
-public class EnvOptions
+async Task<bool> TrySendCommand(FiatClient fiatClient, FiatCommands command, string vin)
 {
-  public string? FiatUser { get; set; }
-  public string? FiatPw { get; set; }
-  public string? MqttServer { get; set; }
-  public int? MqttPort { get; set; }
-  public string? MqttUser { get; set; }
-  public string? MqttPw { get; set; }
+  Console.WriteLine($"SEND COMMAND: {command}");
+  
+  var pin = appConfig.FiatPin ?? throw new Exception("PIN NOT SET");
+  
+  try
+  {
+    await fiatClient.SendCommand(vin, command.ToString(), pin, "ev");
+    await Task.Delay(TimeSpan.FromSeconds(5));
+    Console.WriteLine($"COMMAND: {command} SUCCESSFUL");
+  }
+  catch (Exception e)
+  {
+    Console.WriteLine($"Error sending command: {command}. Maybe wrong pin?");
+    e.Message.Dump();
+    return false;
+  }
+
+  return true;
 }
+
+IEnumerable<HaEntity> CreateEntities(FiatClient fiatClient, SimpleMqttClient mqttClient, Vehicle vehicle, HaDevice haDevice)
+{
+  var updateLocationButton = new HaButton(mqttClient, "UpdateLocation", haDevice, async button =>
+  {
+    if (appConfig.AutoRefreshLocation ||
+        await TrySendCommand(fiatClient, FiatCommands.VF, vehicle.Vin))
+      forceLoopResetEvent.Set();
+  });
+
+  var deepRefreshButton = new HaButton(mqttClient, "DeepRefresh", haDevice, async button =>
+  {
+    if (appConfig.AutoRefreshBattery ||
+        await TrySendCommand(fiatClient, FiatCommands.DEEPREFRESH, vehicle.Vin))
+      forceLoopResetEvent.Set();
+  });
+
+  var locateLightsButton = new HaButton(mqttClient, "Blink", haDevice, async button =>
+  {
+    Console.WriteLine("HBLF");
+  });
+
+  var chargeNowButton = new HaButton(mqttClient, "ChargeNOW", haDevice, async button =>
+  {
+    Console.WriteLine("CNOW");
+  });
+
+  var trunkSwitch = new HaSwitch(mqttClient, "Trunk", haDevice, async sw =>
+  {
+    Console.WriteLine(sw.IsOn ? "ROTRUNKUNLOCK" : "ROTRUNKLOCK");
+  });
+
+  var hvacSwitch = new HaSwitch(mqttClient, "HVAC", haDevice, async sw =>
+  {
+    if (sw.IsOn)
+    {
+      Console.WriteLine("ROPRECOND");
+    }
+    else if (appConfig.EnableDangerousCommands && !sw.IsOn)
+    {
+      Console.WriteLine("ROPRECOND_OFF");
+    }
+  });
+
+  return new HaEntity[]
+    { hvacSwitch, trunkSwitch, chargeNowButton, deepRefreshButton, locateLightsButton, updateLocationButton };
+}
+
+public enum FiatCommands
+{
+  DEEPREFRESH,
+  VF,
+  HBLF,
+  CNOW,
+  ROPRECOND,
+  ROPRECOND_OFF,
+  ROTRUNKUNLOCK,
+  ROTRUNKLOCK
+} 
