@@ -42,16 +42,17 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
 
       foreach (var vehicle in await fiatClient.Fetch())
       {
-        //todo: das läuft nu auch bei refresh loop auslagern in eigene loop
         if (appConfig.AutoRefreshBattery)
         {
-          await TrySendCommand(fiatClient, FiatCommands.DEEPREFRESH, vehicle.Vin);
+          await TrySendCommand(fiatClient, FiatCommand.DEEPREFRESH, vehicle.Vin);
         }
         
         if (appConfig.AutoRefreshLocation)
         {
-          await TrySendCommand(fiatClient, FiatCommands.DEEPREFRESH, vehicle.Vin);
+          await TrySendCommand(fiatClient, FiatCommand.VF, vehicle.Vin);
         }
+        
+        await Task.Delay(TimeSpan.FromSeconds(10), ctx.CancellationToken);
         
         var vehicleName = string.IsNullOrEmpty(vehicle.Nickname) ? "Car" : vehicle.Nickname;
         var suffix = appConfig.DevMode ? "DEV" : "";
@@ -87,14 +88,10 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
           await sensor.PublishState();
         });
 
-        if (!persistentHaEntities.ContainsKey(vehicle.Vin))
-        {
-          var entities = CreateEntities(fiatClient, mqttClient, vehicle, haDevice);
+        var haEntities = persistentHaEntities.GetOrAdd(vehicle.Vin, s => 
+          CreateEntities(fiatClient, mqttClient, vehicle, haDevice));
 
-          persistentHaEntities.TryAdd(vehicle.Vin, entities);
-        }
-
-        foreach (var haEntity in persistentHaEntities.Values.SelectMany(entities => entities))
+        foreach (var haEntity in haEntities)
         {
           await haEntity.Announce();
         }
@@ -112,34 +109,36 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
       Console.WriteLine(e.Message);
     }
 
-    if (WaitHandle.WaitTimeout !=
-        WaitHandle.WaitAny(new[]
-          {
-            ctx.CancellationToken.WaitHandle,
-            forceLoopResetEvent
-          },
-          TimeSpan.FromMinutes(appConfig.RefreshInterval)))
+    WaitHandle.WaitAny(new[]
     {
-      await Task.Delay(TimeSpan.FromSeconds(10), ctx.CancellationToken);
-    }
+      ctx.CancellationToken.WaitHandle,
+      forceLoopResetEvent
+    }, TimeSpan.FromMinutes(appConfig.RefreshInterval));
   }
 });
 
-async Task<bool> TrySendCommand(FiatClient fiatClient, FiatCommands command, string vin)
+async Task<bool> TrySendCommand(FiatClient fiatClient, FiatCommand command, string vin)
 {
-  Console.WriteLine($"SEND COMMAND: {command}");
-  
+  Console.WriteLine($"SEND COMMAND: {command.Message}");
+
   var pin = appConfig.FiatPin ?? throw new Exception("PIN NOT SET");
-  
+
+  if (command.IsDangerous && !appConfig.EnableDangerousCommands)
+  {
+    Console.WriteLine($"{command.Message} not sent. " +
+                      "Set \"EnableDangerousCommands\" option if you want to use it.");
+    return false;
+  }
+
   try
   {
-    await fiatClient.SendCommand(vin, command.ToString(), pin, "ev");
+    await fiatClient.SendCommand(vin, command.Message, pin, command.Action);
     await Task.Delay(TimeSpan.FromSeconds(5));
-    Console.WriteLine($"COMMAND: {command} SUCCESSFUL");
+    Console.WriteLine($"COMMAND: {command.Message} SUCCESSFUL");
   }
   catch (Exception e)
   {
-    Console.WriteLine($"Error sending command: {command}. Maybe wrong pin?");
+    Console.WriteLine($"Error sending command: {command.Message}. Maybe wrong pin?");
     e.Message.Dump();
     return false;
   }
@@ -151,57 +150,70 @@ IEnumerable<HaEntity> CreateEntities(FiatClient fiatClient, SimpleMqttClient mqt
 {
   var updateLocationButton = new HaButton(mqttClient, "UpdateLocation", haDevice, async button =>
   {
-    if (appConfig.AutoRefreshLocation ||
-        await TrySendCommand(fiatClient, FiatCommands.VF, vehicle.Vin))
+    if (await TrySendCommand(fiatClient, FiatCommand.VF, vehicle.Vin))
       forceLoopResetEvent.Set();
   });
 
   var deepRefreshButton = new HaButton(mqttClient, "DeepRefresh", haDevice, async button =>
   {
-    if (appConfig.AutoRefreshBattery ||
-        await TrySendCommand(fiatClient, FiatCommands.DEEPREFRESH, vehicle.Vin))
+    if (await TrySendCommand(fiatClient, FiatCommand.DEEPREFRESH, vehicle.Vin))
       forceLoopResetEvent.Set();
   });
 
   var locateLightsButton = new HaButton(mqttClient, "Blink", haDevice, async button =>
   {
-    Console.WriteLine("HBLF");
+    if (await TrySendCommand(fiatClient, FiatCommand.HBLF, vehicle.Vin))
+      forceLoopResetEvent.Set();
   });
 
   var chargeNowButton = new HaButton(mqttClient, "ChargeNOW", haDevice, async button =>
   {
-    Console.WriteLine("CNOW");
+    if (await TrySendCommand(fiatClient, FiatCommand.CNOW, vehicle.Vin))
+      forceLoopResetEvent.Set();
   });
 
   var trunkSwitch = new HaSwitch(mqttClient, "Trunk", haDevice, async sw =>
   {
-    Console.WriteLine(sw.IsOn ? "ROTRUNKUNLOCK" : "ROTRUNKLOCK");
+    if (sw.IsOn)
+    {
+      if (await TrySendCommand(fiatClient, FiatCommand.ROTRUNKUNLOCK, vehicle.Vin))
+        forceLoopResetEvent.Set();
+      return;
+    }
+
+    if (await TrySendCommand(fiatClient, FiatCommand.ROTRUNKLOCK, vehicle.Vin))
+      forceLoopResetEvent.Set();
   });
 
   var hvacSwitch = new HaSwitch(mqttClient, "HVAC", haDevice, async sw =>
   {
     if (sw.IsOn)
     {
-      Console.WriteLine("ROPRECOND");
+      if (await TrySendCommand(fiatClient, FiatCommand.ROPRECOND, vehicle.Vin))
+        forceLoopResetEvent.Set();
+      return;
     }
-    else if (appConfig.EnableDangerousCommands && !sw.IsOn)
-    {
-      Console.WriteLine("ROPRECOND_OFF");
-    }
+
+    if (await TrySendCommand(fiatClient, FiatCommand.ROPRECOND_OFF, vehicle.Vin))
+      forceLoopResetEvent.Set();
   });
 
   return new HaEntity[]
     { hvacSwitch, trunkSwitch, chargeNowButton, deepRefreshButton, locateLightsButton, updateLocationButton };
 }
 
-public enum FiatCommands
+public class FiatCommand
 {
-  DEEPREFRESH,
-  VF,
-  HBLF,
-  CNOW,
-  ROPRECOND,
-  ROPRECOND_OFF,
-  ROTRUNKUNLOCK,
-  ROTRUNKLOCK
-} 
+  public static readonly FiatCommand DEEPREFRESH = new() { Action = "ev", Message = "DEEPREFRESH" };
+  public static readonly FiatCommand VF = new() { Action = "location", Message = "VF" };
+  public static readonly FiatCommand HBLF = new() { Message = "HBLF" };
+  public static readonly FiatCommand CNOW = new() { Action = "ev/chargenow", Message = "CNOW" };
+  public static readonly FiatCommand ROPRECOND = new() { Message = "ROPRECOND" };
+  public static readonly FiatCommand ROPRECOND_OFF = new() { Message = "ROPRECOND", IsDangerous = true };
+  public static readonly FiatCommand ROTRUNKUNLOCK = new() { Message = "ROTRUNKUNLOCK" };
+  public static readonly FiatCommand ROTRUNKLOCK = new() { Message = "ROTRUNKLOCK" };
+
+  public bool IsDangerous { get; set; }
+  public required string Message { get; init; }
+  public string Action { get; init; } = "remote";
+}
