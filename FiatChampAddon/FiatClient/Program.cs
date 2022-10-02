@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 var builder = CoconaApp.CreateBuilder();
 
 builder.Configuration.AddEnvironmentVariables("FiatChamp_");
+
 builder.Services.AddOptions<AppConfig>()
   .Bind(builder.Configuration)
   .ValidateDataAnnotations()
