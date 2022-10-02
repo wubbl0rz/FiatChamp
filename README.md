@@ -56,7 +56,8 @@ Fill out the required fields in the addon configuration.
 
 - PIN is only needed if you want to send commands to your car. Its the same PIN used by the official app or website.
 - Use DEBUG carefully. It will dump many informations to the log including session tokens and sensitive informations.
+- Automatic refresh of location and battery level may drain your battery a bit more. The car have to wakeup some parts, read new values and sent them back. This will get executed every "Refresh interval" and at every command even if your car is not at home. __Recommendation:__  Better use a Home Assistant automation instead. I have setup and automation that is triggered by plugin the charger cable and then updates the battery level (by calling DeepRefresh) every 30 minutes until its 100% or charger is disconnected.
 
 You dont have to configure MQTT. At startup the Addon will automatically connect to your Home Assistants MQTT Broker.
 
-<img src="https://user-images.githubusercontent.com/30373916/190110618-2705b0e0-bcfc-4023-a572-0912b36c9d35.png" width="700px">
+<img src="https://user-images.githubusercontent.com/30373916/193454721-8dcfa211-58a2-4d12-95f1-87db42beeec1.png" width="700px">
