@@ -121,11 +121,9 @@ public class HaButton : HaEntity
     _commandTopic = $"homeassistant/button/{_id}/set";
     _configTopic = $"homeassistant/button/{_id}/config";
 
-    _ = mqttClient.Sub(_commandTopic, _ =>
+    _ = mqttClient.Sub(_commandTopic, async _ =>
     {
-      onPressedCommand?.Invoke(this);
-      
-      return Task.CompletedTask;
+      await onPressedCommand.Invoke(this);
     });
   }
 
@@ -179,7 +177,7 @@ public class HaSwitch : HaEntity
     {
       this.SwitchTo(message == "ON");
       await Task.Delay(100);
-      onSwitchCommand?.Invoke(this);
+      await onSwitchCommand.Invoke(this);
     });
   }
 

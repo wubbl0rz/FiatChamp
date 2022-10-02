@@ -12,18 +12,10 @@
     <PackageReference Include="AwsSignatureVersion4" Version="4.0.0" />
     <PackageReference Include="Cocona" Version="2.0.3" />
     <PackageReference Include="Flurl.Http" Version="3.2.4" />
+    <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="6.0.0" />
     <PackageReference Include="MQTTnet" Version="4.1.0.247" />
     <PackageReference Include="MQTTnet.Extensions.ManagedClient" Version="4.1.0.247" />
     <PackageReference Include="Polly" Version="7.2.3" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="fakeDetailsResponse.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="fakeVehicleResponse.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
 </Project>

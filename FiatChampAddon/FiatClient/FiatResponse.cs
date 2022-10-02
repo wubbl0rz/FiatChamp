@@ -144,3 +144,18 @@ public class DistanceToEmpty
   public long Value { get; set; }
   public string Unit { get; set; }
 }
+
+public class FcaPinAuthResponse
+{
+  public long Expiry { get; set; }
+  public string Token { get; set; }
+}
+
+public class FcaCommandResponse
+{
+  public string Command { get; set; }
+  public Guid CorrelationId { get; set; }
+  public string ResponseStatus { get; set; }
+  public long StatusTimestamp { get; set; }
+  public long AsyncRespTimeout { get; set; }
+}

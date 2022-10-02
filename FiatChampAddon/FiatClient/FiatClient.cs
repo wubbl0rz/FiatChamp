@@ -1,12 +1,10 @@
+using System.Text;
 using Amazon;
 using Amazon.CognitoIdentity;
 using Amazon.Runtime;
-using AwsSignatureVersion4;
 using FiatChamp;
 using Flurl;
 using Flurl.Http;
-using Flurl.Http.Configuration;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 public class FiatClient
@@ -16,14 +14,16 @@ public class FiatClient
   private readonly string _loginUrl = "https://loginmyuconnect.fiat.com";
   private readonly string _tokenUrl = "https://authz.sdpr-01.fcagcv.com/v2/cognito/identity/token";
   private readonly string _apiUrl = "https://channels.sdpr-01.fcagcv.com";
+  private readonly string _authApiKey = "JWRYW7IYhW9v0RqDghQSx4UcRYRILNmc8zAuh5ys";
+  private readonly string _authUrl = "https://mfa.fcl-01.fcagcv.com";
 
   private readonly string _user;
   private readonly string _password;
   private readonly CookieJar _cookieJar = new();
 
-  private ImmutableCredentials? _credentials;
-  private string? _authUID;
   private readonly IFlurlClient _defaultHttpClient;
+
+  private (string userUid, ImmutableCredentials awsCredentials)? _loginInfo = null;
 
   public FiatClient(string user, string password)
   {
@@ -36,7 +36,34 @@ public class FiatClient
     });
   }
 
-  public async Task Login()
+  public async Task LoginAndKeepSessionAlive()
+  {
+    if (_loginInfo is not null)
+      return;
+    
+    await this.Login();
+    
+    _ = Task.Run(async () =>
+    {
+      var timer = new PeriodicTimer(TimeSpan.FromMinutes(2));
+      
+      while (await timer.WaitForNextTickAsync())
+      {
+        try
+        {
+          Console.WriteLine("REFRESH SESSION");
+          await this.Login();
+        }
+        catch (Exception e)
+        {
+          Console.WriteLine("ERROR WHILE REFRESH SESSION");
+          e.Message.Dump();
+        }
+      }
+    });
+  }
+
+  private async Task Login()
   {
     var loginResponse = await _loginUrl
       .WithClient(_defaultHttpClient)
@@ -58,7 +85,7 @@ public class FiatClient
         {
           { "loginID", _user },
           { "password", _password },
-          { "sessionExpiration", TimeSpan.FromMinutes(1).TotalSeconds },
+          { "sessionExpiration", TimeSpan.FromMinutes(5).TotalSeconds },
           { "include", "profile,data,emails,subscriptions,preferences" },
         }))
       .ReceiveJson<FiatAuthResponse>();
@@ -66,8 +93,6 @@ public class FiatClient
     authResponse.Dump();
 
     authResponse.ThrowOnError("Authentication failed.");
-
-    _authUID = authResponse.UID;
 
     var jwtResponse = await _loginUrl
       .WithClient(_defaultHttpClient)
@@ -88,7 +113,7 @@ public class FiatClient
     var identityResponse = await _tokenUrl
       .WithClient(_defaultHttpClient)
       .WithHeader("content-type", "application/json")
-      .WithHeaders(WithAwsDefaultParameter())
+      .WithHeaders(WithAwsDefaultParameter(_apiKey))
       .PostJsonAsync(new
       {
         gigya_token = jwtResponse.IdToken,
@@ -107,18 +132,19 @@ public class FiatClient
         { "cognito-identity.amazonaws.com", identityResponse.Token }
       });
 
-    _credentials = new ImmutableCredentials(res.Credentials.AccessKeyId,
+    _loginInfo = (authResponse.UID, new ImmutableCredentials(res.Credentials.AccessKeyId,
       res.Credentials.SecretKey,
-      res.Credentials.SessionToken);
+      res.Credentials.SessionToken));
   }
 
-  private Dictionary<string, object> WithAwsDefaultParameter(Dictionary<string, object>? parameters = null)
+  private Dictionary<string, object> WithAwsDefaultParameter(string apiKey, Dictionary<string, object>? parameters = null)
   {
     var dict = new Dictionary<string, object>()
     {
       { "x-clientapp-version", "1.0" },
       { "clientrequestid", Guid.NewGuid().ToString("N")[..16] },
-      { "x-api-key", _apiKey },
+      { "x-api-key", apiKey },
+      { "locale", "de_de" },
       { "x-originator-type", "web" },
     };
 
@@ -147,21 +173,55 @@ public class FiatClient
     return dict;
   }
 
-  public async Task Set(string vin, string action)
+
+  public async Task SendCommand(string vin, string command, string pin, string action = "remote")
   {
+    ArgumentNullException.ThrowIfNull(_loginInfo);
+    
+    var (userUid, awsCredentials) = _loginInfo.Value;
+
+    var data = new
+    {
+      pin = Convert.ToBase64String(Encoding.UTF8.GetBytes(pin))
+    };
+
+    var pinAuthResponse = await _authUrl
+      .AppendPathSegments("v1", "accounts", userUid, "ignite", "pin", "authenticate")
+      .WithHeaders(WithAwsDefaultParameter(_authApiKey))
+      .AwsSign(awsCredentials, data)
+      .PostJsonAsync(data)
+      .ReceiveJson<FcaPinAuthResponse>();
+
+    pinAuthResponse.Dump();
+
+    var json = new
+    {
+      command, 
+      pinAuth = pinAuthResponse.Token
+    };
+
+    var commandResponse = await _apiUrl
+      .AppendPathSegments("v1", "accounts", userUid, "vehicles", vin, action)
+      .WithHeaders(WithAwsDefaultParameter(_apiKey))
+      .AwsSign(awsCredentials, json)
+      .PostJsonAsync(json)
+      .ReceiveJson<FcaCommandResponse>();
+
+    commandResponse.Dump();
   }
 
   public async Task<Vehicle[]> Fetch()
   {
-    ArgumentNullException.ThrowIfNull(_credentials);
-    ArgumentNullException.ThrowIfNull(_authUID);
+    ArgumentNullException.ThrowIfNull(_loginInfo);
+
+    var (userUid, awsCredentials) = _loginInfo.Value;
 
     var vehicleResponse = await _apiUrl
       .WithClient(_defaultHttpClient)
-      .AppendPathSegments("v4", "accounts", _authUID, "vehicles")
+      .AppendPathSegments("v4", "accounts", userUid, "vehicles")
       .SetQueryParam("stage", "ALL")
-      .WithHeaders(WithAwsDefaultParameter())
-      .AwsSign(_credentials)
+      .WithHeaders(WithAwsDefaultParameter(_apiKey))
+      .AwsSign(awsCredentials)
       .GetJsonAsync<VehicleResponse>();
 
     vehicleResponse.Dump();
@@ -170,9 +230,9 @@ public class FiatClient
     {
       var vehicleDetails = await _apiUrl
         .WithClient(_defaultHttpClient)
-        .AppendPathSegments("v2", "accounts", _authUID, "vehicles", vehicleResponse.Vehicles.First().Vin, "status")
-        .WithHeaders(WithAwsDefaultParameter())
-        .AwsSign(_credentials)
+        .AppendPathSegments("v2", "accounts", userUid, "vehicles", vehicleResponse.Vehicles.First().Vin, "status")
+        .WithHeaders(WithAwsDefaultParameter(_apiKey))
+        .AwsSign(awsCredentials)
         .GetJsonAsync<JObject>();
 
       vehicleDetails.Dump();
@@ -181,9 +241,9 @@ public class FiatClient
 
       var vehicleLocation = await _apiUrl
         .WithClient(_defaultHttpClient)
-        .AppendPathSegments("v1", "accounts", _authUID, "vehicles", vehicle.Vin, "location", "lastknown")
-        .WithHeaders(WithAwsDefaultParameter())
-        .AwsSign(_credentials)
+        .AppendPathSegments("v1", "accounts", userUid, "vehicles", vehicle.Vin, "location", "lastknown")
+        .WithHeaders(WithAwsDefaultParameter(_apiKey))
+        .AwsSign(awsCredentials)
         .GetJsonAsync<VehicleLocation>();
 
       vehicle.Location = vehicleLocation;

@@ -3,7 +3,7 @@ url: "https://github.com/wubbl0rz/FiatChamp"
 description: "Connect your FIAT (uconnect) car to Home Assistant. 🚗"
 services:
     - "mqtt:need"
-version: "1.0.56"
+version: "2.0.4"
 slug: "fiat_champ"
 init: false
 discovery: 
@@ -14,12 +14,18 @@ options:
   FiatPin: ""
   RefreshInterval: 15
   Debug: false
+  AutoRefreshBattery: false
+  AutoRefreshLocation: false
+  EnableDangerousCommands: false
 schema:
   FiatUser: str
   FiatPw: password
   FiatPin: password?
   RefreshInterval: int
   Debug: bool
+  AutoRefreshBattery: bool
+  AutoRefreshLocation: bool
+  EnableDangerousCommands: bool
 arch:
   - amd64
   - armv7

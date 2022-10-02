@@ -19,11 +19,17 @@ Example dashboard using sensors and entities provided by this addon:
 - Supports multiple cars on the same account. 
 - Location tracking.
 - Uses the same data source as the official app.
+- Remote commands (open doors, switch air conditioner on, ...) are supported since version 2.0. Some commands may not work with all cars. Available commands are:
+  - "UpdateLocation" (updates gps location from the car) 
+  - "DeepRefresh" (gets battery charge level)
+  - "Blink" (blink lights)
+  - "ChargeNOW" (starts charging)
+  - "Trunk" (open/close trunk lock)
+  - "HVAC" (turn on the temperature preconditioning in the car. __the official app does not support turning preconditioning off 😅 i found an hidden command for this but i don't know if it will work or have negative side effects. enable it by setting the "EnableDangerousCommands" option.__)
 
 ## What doesn't work (yet)?
 
 - Eco Reports (statistics). I could not find any API yet. The official app shows it so in theory it should be accessible.
-- Remote commands (open doors, switch air conditioner on, ...). Home Assistant side is already implemented and you should see the buttons but they do nothing. 
 
 ## What will NEVER work?
 
@@ -48,7 +54,7 @@ Short version:
 
 Fill out the required fields in the addon configuration. 
 
-- PIN is currently unused. 
+- PIN is only needed if you want to send commands to your car. Its the same PIN used by the official app or website.
 - Use DEBUG carefully. It will dump many informations to the log including session tokens and sensitive informations.
 
 You dont have to configure MQTT. At startup the Addon will automatically connect to your Home Assistants MQTT Broker.

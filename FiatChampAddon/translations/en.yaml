@@ -12,3 +12,13 @@ configuration:
   RefreshInterval:
     name: Refresh interval
     description: Fetch new data from api every N minutes.
+  EnableDangerousCommands:
+    name: Dangerous commands.
+    description: Enable commands that are potentially dangerous and/or experimental. Like unlocking doors or deactivate air conditioning.
+  AutoRefreshBattery:
+    name: Refresh battery status.
+    description: Automatic update battery status every refresh interval.
+  AutoRefreshLocation:
+    name: Refresh location.
+    description: Automatic update location every refresh interval.
+

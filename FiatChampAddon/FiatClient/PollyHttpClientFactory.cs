@@ -20,8 +20,7 @@ public class PollyHttpClientFactory : DefaultHttpClientFactory
             var ex = delegateResult.Exception as HttpRequestException;
             var result = delegateResult.Result?.StatusCode.ToString() ?? ex?.StatusCode.ToString() ?? ex?.Message;
 
-            Console.WriteLine(
-              $"Error connecting to {request.RequestUri}. Result: {result} {ex?.Message}. Retrying in {time}");
+            Console.WriteLine($"Error connecting to {request.RequestUri}. Result: {result}. Retrying in {time}");
           });
 
       return retryPolicy.ExecuteAsync(ct => { return base.SendAsync(request, ct); }, cancellationToken);

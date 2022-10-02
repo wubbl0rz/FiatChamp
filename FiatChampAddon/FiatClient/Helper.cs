@@ -41,11 +41,12 @@ public static class Helper
     return result;
   }
   
-  public static IFlurlRequest AwsSign(this IFlurlRequest request, ImmutableCredentials credentials, string data = "")
+  public static IFlurlRequest AwsSign(this IFlurlRequest request, ImmutableCredentials credentials, object? data = null)
   {
     request.BeforeCall(call =>
     {
-      call.HttpRequestMessage.Content = new StringContent(data, Encoding.UTF8, "application/json"); 
+      var json = data == null ? "" : JsonConvert.SerializeObject(data); 
+      call.HttpRequestMessage.Content = new StringContent(json, Encoding.UTF8, "application/json");
 
       Signer.Sign(call.HttpRequestMessage,
         null, new List<KeyValuePair<string, IEnumerable<string>>>(),
