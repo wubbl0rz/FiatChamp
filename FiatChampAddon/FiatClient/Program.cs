@@ -174,46 +174,16 @@ IEnumerable<HaEntity> CreateEntities(FiatClient fiatClient, SimpleMqttClient mqt
 
   var trunkSwitch = new HaSwitch(mqttClient, "Trunk", haDevice, async sw =>
   {
-    if (sw.IsOn)
-    {
-      if (await TrySendCommand(fiatClient, FiatCommand.ROTRUNKUNLOCK, vehicle.Vin))
-        forceLoopResetEvent.Set();
-      return;
-    }
-
-    if (await TrySendCommand(fiatClient, FiatCommand.ROTRUNKLOCK, vehicle.Vin))
+    if (await TrySendCommand(fiatClient, sw.IsOn ? FiatCommand.ROTRUNKUNLOCK : FiatCommand.ROTRUNKLOCK, vehicle.Vin))
       forceLoopResetEvent.Set();
   });
 
   var hvacSwitch = new HaSwitch(mqttClient, "HVAC", haDevice, async sw =>
   {
-    if (sw.IsOn)
-    {
-      if (await TrySendCommand(fiatClient, FiatCommand.ROPRECOND, vehicle.Vin))
-        forceLoopResetEvent.Set();
-      return;
-    }
-
-    if (await TrySendCommand(fiatClient, FiatCommand.ROPRECOND_OFF, vehicle.Vin))
+    if (await TrySendCommand(fiatClient, sw.IsOn ? FiatCommand.ROPRECOND : FiatCommand.ROPRECOND_OFF, vehicle.Vin))
       forceLoopResetEvent.Set();
   });
 
   return new HaEntity[]
     { hvacSwitch, trunkSwitch, chargeNowButton, deepRefreshButton, locateLightsButton, updateLocationButton };
-}
-
-public class FiatCommand
-{
-  public static readonly FiatCommand DEEPREFRESH = new() { Action = "ev", Message = "DEEPREFRESH" };
-  public static readonly FiatCommand VF = new() { Action = "location", Message = "VF" };
-  public static readonly FiatCommand HBLF = new() { Message = "HBLF" };
-  public static readonly FiatCommand CNOW = new() { Action = "ev/chargenow", Message = "CNOW" };
-  public static readonly FiatCommand ROPRECOND = new() { Message = "ROPRECOND" };
-  public static readonly FiatCommand ROPRECOND_OFF = new() { Message = "ROPRECOND", IsDangerous = true };
-  public static readonly FiatCommand ROTRUNKUNLOCK = new() { Message = "ROTRUNKUNLOCK" };
-  public static readonly FiatCommand ROTRUNKLOCK = new() { Message = "ROTRUNKLOCK" };
-
-  public bool IsDangerous { get; set; }
-  public required string Message { get; init; }
-  public string Action { get; init; } = "remote";
 }
