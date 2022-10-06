@@ -23,6 +23,8 @@ var forceLoopResetEvent = new AutoResetEvent(false);
 
 await app.RunAsync(async (CoconaAppContext ctx) =>
 {
+  Console.WriteLine("===== CONFIG ===== \n\n{0}\n", appConfig);
+  
   var fiatClient = new FiatClient(appConfig.FiatUser, appConfig.FiatPw);
 
   var mqttClient = new SimpleMqttClient(appConfig.MqttServer,
@@ -36,6 +38,8 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
   while (!ctx.CancellationToken.IsCancellationRequested)
   {
     Console.WriteLine($"FETCH DATA... {DateTime.Now}");
+    
+    GC.Collect();
     
     try
     {

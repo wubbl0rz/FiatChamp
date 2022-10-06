@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 2.0.6 - 2022-10-06
+- fixed high memory usage with prebuilt image. as a bonus installation an upgrades should be a lot faster now.
+
 ## 2.0.0 - 2022-09-27
 - added command support. you can now sent commands like "activate air conditioner" to your car.
 - refresh interval now functions correctly
