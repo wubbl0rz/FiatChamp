@@ -11,6 +11,8 @@ Example dashboard using sensors and entities provided by this addon:
 
 ![image](https://user-images.githubusercontent.com/30373916/190108698-6df2a4de-776d-45e2-8f27-1c5521f79476.png)
 
+Info: If you update from 2.0.0 to 2.0.6 there is a chance the update will fail. thats because before < 2.0.6 the addon was build by docker locally on the home assistant host and from 2.0.6 onwards its using a prebuilt image. one time reinstall will fix this.
+
 ## Prerequisites
 
 - Official Home Assistant MQTT Addon up and running. 
