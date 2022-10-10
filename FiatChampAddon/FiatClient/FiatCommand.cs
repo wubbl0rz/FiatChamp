@@ -8,6 +8,8 @@ public class FiatCommand
   public static readonly FiatCommand ROPRECOND_OFF = new() { Message = "ROPRECOND", IsDangerous = true };
   public static readonly FiatCommand ROTRUNKUNLOCK = new() { Message = "ROTRUNKUNLOCK" };
   public static readonly FiatCommand ROTRUNKLOCK = new() { Message = "ROTRUNKLOCK" };
+  public static readonly FiatCommand RDU = new() { Message = "RDU", IsDangerous = true };
+  public static readonly FiatCommand RDL = new() { Message = "RDL", IsDangerous = true };
 
   public bool IsDangerous { get; set; }
   public required string Message { get; init; }

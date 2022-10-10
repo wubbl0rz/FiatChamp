@@ -55,9 +55,8 @@ public static class Helper
 
     return request;
   }
-
-  [Conditional("DEBUG")]
-  public static void Dump(this object o)
+  
+  public static string Dump(this object o)
   {
     try
     {
@@ -73,22 +72,20 @@ public static class Helper
         try
         {
           var json = JObject.Parse(str);
-          Console.WriteLine(json);
+          return json.ToString(Formatting.Indented);
         }
         catch (Exception e)
         {
-          // ignored
+          return str;
         }
-        
-        return;
       }
 
-      Console.WriteLine(JsonConvert.SerializeObject(result, Formatting.Indented));
-      
+      return JsonConvert.SerializeObject(result, Formatting.Indented);
+
     }
     catch (Exception)
     {
-      // ignored
+      return o.GetType().ToString();
     }
   }
 }

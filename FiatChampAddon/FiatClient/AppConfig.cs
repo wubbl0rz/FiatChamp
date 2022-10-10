@@ -18,8 +18,9 @@ public record AppConfig
   public bool AutoRefreshBattery { get; set; } = false;
   public bool EnableDangerousCommands { get; set; } = false;
   public bool DevMode { get; set; } = false;
+  public bool Debug { get; set; } = false;
 
-  public override string ToString()
+  public string ToStringWithoutSecrets()
   {
     var tmp = this with
     {
@@ -30,7 +31,7 @@ public record AppConfig
 
     return JsonConvert.SerializeObject(tmp, Formatting.Indented);
   }
-
+  
   public bool IsPinSet()
   {
     return !string.IsNullOrWhiteSpace(this.FiatPin);

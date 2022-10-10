@@ -5,6 +5,8 @@ using FiatChamp.HA;
 using Flurl.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
+using Serilog.Events;
 
 var builder = CoconaApp.CreateBuilder();
 
@@ -21,10 +23,16 @@ var persistentHaEntities = new ConcurrentDictionary<string, IEnumerable<HaEntity
 var appConfig = builder.Configuration.Get<AppConfig>();
 var forceLoopResetEvent = new AutoResetEvent(false);
 
+Log.Logger = new LoggerConfiguration()
+  .MinimumLevel.Is(appConfig.Debug ? LogEventLevel.Debug : LogEventLevel.Information)
+  .WriteTo.Console()
+  .CreateLogger();
+
 await app.RunAsync(async (CoconaAppContext ctx) =>
 {
-  Console.WriteLine("===== CONFIG ===== \n\n{0}\n", appConfig);
-  
+  Log.Information("{0}", appConfig.ToStringWithoutSecrets());
+  Log.Debug( "{0}",appConfig.Dump());
+
   var fiatClient = new FiatClient(appConfig.FiatUser, appConfig.FiatPw);
 
   var mqttClient = new SimpleMqttClient(appConfig.MqttServer,
@@ -37,7 +45,7 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
 
   while (!ctx.CancellationToken.IsCancellationRequested)
   {
-    Console.WriteLine($"FETCH DATA... {DateTime.Now}");
+    Log.Information("Now fetching new data...");
     
     GC.Collect();
     
@@ -104,15 +112,17 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
     }
     catch (FlurlHttpException httpException)
     {
-      Console.WriteLine($"Error connecting to the FIAT API. \n" +
-                        $"This can happen from time to time. Retrying in {appConfig.RefreshInterval} minutes.");
+      Log.Warning($"Error connecting to the FIAT API. \n" +
+                  $"This can happen from time to time. Retrying in {appConfig.RefreshInterval} minutes.");
 
-      httpException.Message.Dump();
+      Log.Debug("{0}", httpException.Message);
     }
     catch (Exception e)
     {
-      Console.WriteLine(e.Message);
+      Log.Error("{0}", e);
     }
+    
+    Log.Information("Fetching COMPLETED. Next update in {0} minutes.", appConfig.RefreshInterval);
 
     WaitHandle.WaitAny(new[]
     {
@@ -124,14 +134,14 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
 
 async Task<bool> TrySendCommand(FiatClient fiatClient, FiatCommand command, string vin)
 {
-  Console.WriteLine($"SEND COMMAND: {command.Message}");
+  Log.Information("SEND COMMAND {0}: ", command.Message);
 
   var pin = appConfig.FiatPin ?? throw new Exception("PIN NOT SET");
 
   if (command.IsDangerous && !appConfig.EnableDangerousCommands)
   {
-    Console.WriteLine($"{command.Message} not sent. " +
-                      "Set \"EnableDangerousCommands\" option if you want to use it.");
+    Log.Warning("{0} not sent. " +
+                "Set \"EnableDangerousCommands\" option if you want to use it. ", command.Message);
     return false;
   }
 
@@ -139,19 +149,20 @@ async Task<bool> TrySendCommand(FiatClient fiatClient, FiatCommand command, stri
   {
     await fiatClient.SendCommand(vin, command.Message, pin, command.Action);
     await Task.Delay(TimeSpan.FromSeconds(5));
-    Console.WriteLine($"COMMAND: {command.Message} SUCCESSFUL");
+    Log.Information("Command: {0} SUCCESSFUL", command.Message);
   }
   catch (Exception e)
   {
-    Console.WriteLine($"Error sending command: {command.Message}. Maybe wrong pin?");
-    e.Message.Dump();
+    Log.Error("Command: {0} ERROR. Maybe wrong pin?", command.Message);
+    Log.Debug("{0}", e);
     return false;
   }
 
   return true;
 }
 
-IEnumerable<HaEntity> CreateEntities(FiatClient fiatClient, SimpleMqttClient mqttClient, Vehicle vehicle, HaDevice haDevice)
+IEnumerable<HaEntity> CreateEntities(FiatClient fiatClient, SimpleMqttClient mqttClient, Vehicle vehicle,
+  HaDevice haDevice)
 {
   var updateLocationButton = new HaButton(mqttClient, "UpdateLocation", haDevice, async button =>
   {
@@ -189,6 +200,14 @@ IEnumerable<HaEntity> CreateEntities(FiatClient fiatClient, SimpleMqttClient mqt
       forceLoopResetEvent.Set();
   });
 
+  var lockSwitch = new HaSwitch(mqttClient, "DoorLock", haDevice, async sw =>
+  {
+    if (await TrySendCommand(fiatClient, sw.IsOn ? FiatCommand.RDL : FiatCommand.RDU, vehicle.Vin))
+      forceLoopResetEvent.Set();
+  });
+
   return new HaEntity[]
-    { hvacSwitch, trunkSwitch, chargeNowButton, deepRefreshButton, locateLightsButton, updateLocationButton };
+  {
+    hvacSwitch, trunkSwitch, chargeNowButton, deepRefreshButton, locateLightsButton, updateLocationButton, lockSwitch
+  };
 }

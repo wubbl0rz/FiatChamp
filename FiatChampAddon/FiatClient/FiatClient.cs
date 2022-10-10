@@ -6,6 +6,7 @@ using FiatChamp;
 using Flurl;
 using Flurl.Http;
 using Newtonsoft.Json.Linq;
+using Serilog;
 
 public class FiatClient
 {
@@ -51,13 +52,14 @@ public class FiatClient
       {
         try
         {
-          Console.WriteLine("REFRESH SESSION");
+          Log.Information("REFRESH SESSION");
           await this.Login();
         }
         catch (Exception e)
         {
-          Console.WriteLine("ERROR WHILE REFRESH SESSION");
-          e.Message.Dump();
+          
+          Log.Error("ERROR WHILE REFRESH SESSION");
+          Log.Debug("{0}", e);
         }
       }
     });
@@ -72,7 +74,7 @@ public class FiatClient
       .WithCookies(_cookieJar)
       .GetJsonAsync<FiatLoginResponse>();
 
-    loginResponse.Dump();
+    Log.Debug("{0}", loginResponse.Dump());
 
     loginResponse.ThrowOnError("Login failed.");
 
@@ -90,7 +92,7 @@ public class FiatClient
         }))
       .ReceiveJson<FiatAuthResponse>();
 
-    authResponse.Dump();
+    Log.Debug("{0}", authResponse.Dump());
 
     authResponse.ThrowOnError("Authentication failed.");
 
@@ -106,7 +108,7 @@ public class FiatClient
       .WithCookies(_cookieJar)
       .GetJsonAsync<FiatJwtResponse>();
 
-    jwtResponse.Dump();
+    Log.Debug("{0}", jwtResponse.Dump());
 
     jwtResponse.ThrowOnError("Authentication failed.");
 
@@ -120,9 +122,9 @@ public class FiatClient
       })
       .ReceiveJson<FcaIdentityResponse>();
 
+    Log.Debug("{0}", identityResponse.Dump());
+    
     identityResponse.ThrowOnError("Identity failed.");
-
-    identityResponse.Dump();
 
     var client = new AmazonCognitoIdentityClient(new AnonymousAWSCredentials(), RegionEndpoint.EUWest1);
 
@@ -192,7 +194,7 @@ public class FiatClient
       .PostJsonAsync(data)
       .ReceiveJson<FcaPinAuthResponse>();
 
-    pinAuthResponse.Dump();
+    Log.Debug("{0}", pinAuthResponse.Dump());
 
     var json = new
     {
@@ -207,7 +209,7 @@ public class FiatClient
       .PostJsonAsync(json)
       .ReceiveJson<FcaCommandResponse>();
 
-    commandResponse.Dump();
+    Log.Debug("{0}", commandResponse.Dump());
   }
 
   public async Task<Vehicle[]> Fetch()
@@ -223,8 +225,8 @@ public class FiatClient
       .WithHeaders(WithAwsDefaultParameter(_apiKey))
       .AwsSign(awsCredentials)
       .GetJsonAsync<VehicleResponse>();
-
-    vehicleResponse.Dump();
+    
+    Log.Debug("{0}", vehicleResponse.Dump());
 
     foreach (var vehicle in vehicleResponse.Vehicles)
     {
@@ -234,8 +236,8 @@ public class FiatClient
         .WithHeaders(WithAwsDefaultParameter(_apiKey))
         .AwsSign(awsCredentials)
         .GetJsonAsync<JObject>();
-
-      vehicleDetails.Dump();
+      
+      Log.Debug("{0}", vehicleDetails.Dump());
 
       vehicle.Details = vehicleDetails;
 
@@ -248,7 +250,7 @@ public class FiatClient
 
       vehicle.Location = vehicleLocation;
 
-      vehicleLocation.Dump();
+      Log.Debug("{0}", vehicleLocation.Dump());
     }
 
     return vehicleResponse.Vehicles;
