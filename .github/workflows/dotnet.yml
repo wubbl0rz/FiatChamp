@@ -1,0 +1,43 @@
+name: .NET
+
+on:
+  push:
+    branches: 
+      - release
+    tags:        
+      - v[0-9]+\.[0-9]+\.[0-9]+
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - arch: "armv7"
+            rid: "linux-musl-arm"
+          - arch: "amd64"
+            rid: "linux-musl-x64"
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout
+      uses: actions/checkout@v3
+    - name: setup
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 7.0.x
+    - name: build_release
+      run: |
+        cd TestAddon/App 
+        dotnet publish -r ${{ matrix.rid }} --configuration Release --self-contained -o build/
+    - name: docker_login
+      uses: docker/login-action@v2.0.0
+      with:
+        registry: ghcr.io
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: create_image
+      uses: home-assistant/builder@2022.09.0
+      with:
+        args: |
+          --test
+          --${{ matrix.arch }} \
+          --target TestAddon
