@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text;
+using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 
 namespace FiatChamp;
@@ -17,13 +18,18 @@ public record AppConfig
   public bool AutoRefreshLocation { get; set; } = false;
   public bool AutoRefreshBattery { get; set; } = false;
   public bool EnableDangerousCommands { get; set; } = false;
+  public bool ConvertKmToMiles { get; set; } = false;
   public bool DevMode { get; set; } = false;
+  public bool UseFakeApi { get; set; } = false;
   public bool Debug { get; set; } = false;
 
   public string ToStringWithoutSecrets()
   {
+    var user = this.FiatUser[0..2] + new string('*', this.FiatUser[2..].Length);
+
     var tmp = this with
     {
+      FiatUser = user,
       FiatPw = new string('*', this.FiatPw.Length),
       MqttPw = new string('*', this.MqttPw.Length),
       FiatPin = new string('*', this.FiatPin?.Length ?? 0)
