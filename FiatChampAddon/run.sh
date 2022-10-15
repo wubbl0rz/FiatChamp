@@ -9,11 +9,13 @@ export FiatChamp_FiatUser=$(bashio::config 'FiatUser')
 export FiatChamp_FiatPw=$(bashio::config 'FiatPw')
 export FiatChamp_FiatPin=$(bashio::config 'FiatPin')
 
+export FiatChamp_ConvertKmToMiles=$(bashio::config 'ConvertKmToMiles')
+
 export FiatChamp_AutoRefreshLocation=$(bashio::config 'AutoRefreshLocation')
 export FiatChamp_AutoRefreshBattery=$(bashio::config 'AutoRefreshBattery')
 export FiatChamp_EnableDangerousCommands=$(bashio::config 'EnableDangerousCommands')
 
-DEBUG=$(bashio::config 'Debug')
+export FiatChamp_Debug=$(bashio::config 'Debug')
 
 cd /build/
 ./FiatChamp

@@ -6,8 +6,10 @@ public abstract class HaEntity
   protected readonly string _name;
   protected readonly HaDevice _haDevice;
   protected readonly string _id;
+  
+  public string Name => _name;
 
-  public HaEntity(SimpleMqttClient mqttClient, string name, HaDevice haDevice)
+  protected HaEntity(SimpleMqttClient mqttClient, string name, HaDevice haDevice)
   {
     _mqttClient = mqttClient;
     _name = name;
@@ -74,9 +76,12 @@ public class HaDeviceTracker : HaEntity
 public class HaSensor : HaEntity
 {
   public string Value { get; set; } = "";
+  public string Icon { get; set; } = "mdi:eye";
+  public string Unit { get; set; } = "";
+  
   private readonly string _stateTopic;
   private readonly string _configTopic;
-  
+
   public HaSensor(SimpleMqttClient mqttClient, string name, HaDevice haDevice) : base(mqttClient, name, haDevice)
   {
     _stateTopic = $"homeassistant/sensor/{_id}/state";
@@ -99,6 +104,8 @@ public class HaSensor : HaEntity
         "name":"{{ _haDevice.Name }}",
         "sw_version":"{{ _haDevice.Version }}"},
       "name":"{{ _name }}",
+      "unit_of_measurement":"{{ this.Unit }}",
+      "icon":"{{ this.Icon }}",
       "state_topic":"{{ _stateTopic }}",
       "unique_id":"{{ _id }}",
       "platform":"mqtt"

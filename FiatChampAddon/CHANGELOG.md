@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 2.0.13 - 2022-10-16
+- km to miles conversion
+- distance sensors export unit of measurement to home assistant (km or mi)
+- more fitting icons for some sensors
+- obfuscate mail account in log
+- fix debug logging
+
 ## 2.0.7 - 2022-10-10
 - supports remote door locking and unlocking. dangerous command... disabled by default.
 - more logging

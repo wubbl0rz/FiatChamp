@@ -9,9 +9,15 @@ configuration:
   FiatPin:
     name: Pin
     description: Your PIN. Used for sending commands to the car.
+  ConvertKmToMiles:
+    name: Convert km to miles (EXPERIMENTAL)
+    description: Try to convert kilometer values to miles
   RefreshInterval:
     name: Refresh interval
     description: Fetch new data from api every N minutes.
+  Debug:
+    name: Debug
+    description: Enable debug logging. It will dump many informations to the log including session tokens and sensitive informations.
   EnableDangerousCommands:
     name: Dangerous commands.
     description: Enable commands that are potentially dangerous and/or experimental. Like unlocking doors or deactivate air conditioning.

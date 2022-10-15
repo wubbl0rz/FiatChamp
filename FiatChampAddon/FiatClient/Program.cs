@@ -1,16 +1,20 @@
 ﻿using System.Collections.Concurrent;
+using System.Globalization;
 using Cocona;
 using FiatChamp;
 using FiatChamp.HA;
 using Flurl.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json.Linq;
 using Serilog;
 using Serilog.Events;
 
 var builder = CoconaApp.CreateBuilder();
 
 builder.Configuration.AddEnvironmentVariables("FiatChamp_");
+
+//todo: integrate reports and events
 
 builder.Services.AddOptions<AppConfig>()
   .Bind(builder.Configuration)
@@ -31,9 +35,10 @@ Log.Logger = new LoggerConfiguration()
 await app.RunAsync(async (CoconaAppContext ctx) =>
 {
   Log.Information("{0}", appConfig.ToStringWithoutSecrets());
-  Log.Debug( "{0}",appConfig.Dump());
+  Log.Debug("{0}", appConfig.Dump());
 
-  var fiatClient = new FiatClient(appConfig.FiatUser, appConfig.FiatPw);
+  IFiatClient fiatClient =
+    appConfig.UseFakeApi ? new FiatClientFake() : new FiatClient(appConfig.FiatUser, appConfig.FiatPw);
 
   var mqttClient = new SimpleMqttClient(appConfig.MqttServer,
     appConfig.MqttPort,
@@ -46,9 +51,9 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
   while (!ctx.CancellationToken.IsCancellationRequested)
   {
     Log.Information("Now fetching new data...");
-    
+
     GC.Collect();
-    
+
     try
     {
       await fiatClient.LoginAndKeepSessionAlive();
@@ -59,14 +64,14 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
         {
           await TrySendCommand(fiatClient, FiatCommand.DEEPREFRESH, vehicle.Vin);
         }
-        
+
         if (appConfig.AutoRefreshLocation)
         {
           await TrySendCommand(fiatClient, FiatCommand.VF, vehicle.Vin);
         }
-        
+
         await Task.Delay(TimeSpan.FromSeconds(10), ctx.CancellationToken);
-        
+
         var vehicleName = string.IsNullOrEmpty(vehicle.Nickname) ? "Car" : vehicle.Nickname;
         var suffix = appConfig.DevMode ? "DEV" : "";
 
@@ -85,27 +90,66 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
           Lon = vehicle.Location.Longitude
         };
 
+        Log.Debug("Announce sensor: {0}", tracker.Dump());
         await tracker.Announce();
         await tracker.PublishState();
 
         var compactDetails = vehicle.Details.Compact("car");
 
-        await Parallel.ForEachAsync(compactDetails, async (sensorData, token) =>
+        var sensors = compactDetails.Select(detail =>
         {
-          var sensor = new HaSensor(mqttClient, sensorData.Key, haDevice)
+          var sensor = new HaSensor(mqttClient, detail.Key, haDevice)
           {
-            Value = sensorData.Value
+            Value = detail.Value
           };
+          
+          if (detail.Key.EndsWith("_value"))
+          {
+            var unitKey = detail.Key.Replace("_value", "_unit");
 
+            compactDetails.TryGetValue(unitKey, out var tmpUnit);
+
+            if (appConfig.ConvertKmToMiles && tmpUnit == "km")
+            {
+              if (int.TryParse(detail.Value, out var kmValue))
+              {
+                var miValue = kmValue * 0.62137;
+                sensor.Value = miValue.ToString(CultureInfo.InvariantCulture);
+                tmpUnit = "mi";
+              }
+            }
+
+            switch (tmpUnit)
+            {
+              case "volts":
+                sensor.Icon = "mdi:lightning-bolt";
+                sensor.Unit = "V";
+                break;
+              case null or "null":
+                sensor.Unit = "";
+                break;
+              default:
+                sensor.Unit = tmpUnit;
+                break;
+            }
+          }
+
+          return sensor;
+        });
+        
+        await Parallel.ForEachAsync(sensors.ToList(), async (sensor, token) =>
+        {
+          Log.Debug("Announce sensor: {0}", sensor.Dump());
           await sensor.Announce();
           await sensor.PublishState();
         });
 
-        var haEntities = persistentHaEntities.GetOrAdd(vehicle.Vin, s => 
-          CreateEntities(fiatClient, mqttClient, vehicle, haDevice));
+        var haEntities = persistentHaEntities.GetOrAdd(vehicle.Vin, s =>
+          CreateInteractiveEntities(fiatClient, mqttClient, vehicle, haDevice));
 
         foreach (var haEntity in haEntities)
         {
+          Log.Debug("Announce sensor: {0}", haEntity.Dump());
           await haEntity.Announce();
         }
       }
@@ -121,7 +165,7 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
     {
       Log.Error("{0}", e);
     }
-    
+
     Log.Information("Fetching COMPLETED. Next update in {0} minutes.", appConfig.RefreshInterval);
 
     WaitHandle.WaitAny(new[]
@@ -132,7 +176,7 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
   }
 });
 
-async Task<bool> TrySendCommand(FiatClient fiatClient, FiatCommand command, string vin)
+async Task<bool> TrySendCommand(IFiatClient fiatClient, FiatCommand command, string vin)
 {
   Log.Information("SEND COMMAND {0}: ", command.Message);
 
@@ -161,7 +205,7 @@ async Task<bool> TrySendCommand(FiatClient fiatClient, FiatCommand command, stri
   return true;
 }
 
-IEnumerable<HaEntity> CreateEntities(FiatClient fiatClient, SimpleMqttClient mqttClient, Vehicle vehicle,
+IEnumerable<HaEntity> CreateInteractiveEntities(IFiatClient fiatClient, SimpleMqttClient mqttClient, Vehicle vehicle,
   HaDevice haDevice)
 {
   var updateLocationButton = new HaButton(mqttClient, "UpdateLocation", haDevice, async button =>
