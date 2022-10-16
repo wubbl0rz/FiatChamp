@@ -1,11 +1,8 @@
 #!/usr/bin/env bash
 
-cd FiatChampAddon/FiatClient/
+cp README.md FiatChampAddon/DOCS.md
+cp README.md FiatChampAddon/.
 
-~/.dotnet/dotnet publish --configuration Release -r linux-musl-x64 --self-contained=true -o build/amd64
-~/.dotnet/dotnet publish --configuration Release -r linux-musl-arm --self-contained=true -o build/armv7
+VERSION=$(cat FiatChampAddon/config.yaml| grep version | grep -P -o "[\d\.]*")
 
-cd ../../
-
-docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-docker run --rm --privileged -v ~/.docker:/root/.docker -v $(pwd)/FiatChampAddon:/data homeassistant/amd64-builder --all -t /data
+git tag -a $VERSION -m $VERSION

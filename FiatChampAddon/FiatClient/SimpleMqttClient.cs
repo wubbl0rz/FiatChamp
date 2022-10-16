@@ -2,6 +2,7 @@ using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Extensions.ManagedClient;
 using MQTTnet.Protocol;
+using Serilog;
 
 namespace FiatChamp;
 
@@ -61,7 +62,7 @@ public class SimpleMqttClient
         }
         catch (Exception e)
         {
-          Console.WriteLine(e);
+          Log.Error("{0}", e);
         }
       }
     };
