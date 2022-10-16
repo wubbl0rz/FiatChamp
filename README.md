@@ -72,4 +72,4 @@ You dont have to configure MQTT. At startup the Addon will automatically connect
 
 it should work. have a look at the attributes. only the main status says "unknown". haven't figured out yet how to fix that.
 
-![image](https://user-images.githubusercontent.com/30373916/196045834-0d57657a-3ef0-4361-9340-7946778158e7.png)
+<img src="https://user-images.githubusercontent.com/30373916/196045834-0d57657a-3ef0-4361-9340-7946778158e7.png" width="300px">
