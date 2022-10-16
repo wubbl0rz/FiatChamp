@@ -65,3 +65,11 @@ You dont have to configure MQTT. At startup the Addon will automatically connect
 - Mqtt override can be used if you want to utilize an external mqtt broker. __You do not need this if you are using the official home assistant mqtt addon.__
 
 <img src="https://user-images.githubusercontent.com/30373916/196044104-a3f594d4-45d1-4436-af98-ca7dc88cec29.png" width="700px">
+
+## FAQ
+
+### Why is location not working.
+
+it should work. have a look at the attributes. only the main status says "unknown". haven't figured out yet how to fix that.
+
+![image](https://user-images.githubusercontent.com/30373916/196045834-0d57657a-3ef0-4361-9340-7946778158e7.png)
