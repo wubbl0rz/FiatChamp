@@ -27,4 +27,16 @@ configuration:
   AutoRefreshLocation:
     name: Refresh location.
     description: Automatic update location every refresh interval.
+  OverrideMqttUser:
+    name: Override mqtt user.
+    description: Override mqtt settings if you are using an external broker. you do not need this if you are using the official home assistant mqtt addon.
+  OverrideMqttPw:
+    name: Override mqtt pw.
+    description: Override mqtt settings if you are using an external broker. you do not need this if you are using the official home assistant mqtt addon.
+  OverrideMqttServer:
+    name: Override mqtt server.
+    description: Override mqtt settings if you are using an external broker. you do not need this if you are using the official home assistant mqtt addon.
+  OverrideMqttPort:
+    name: Override mqtt port.
+    description: Override mqtt settings if you are using an external broker. you do not need this if you are using the official home assistant mqtt addon.
 
