@@ -69,6 +69,14 @@ You dont have to configure MQTT. At startup the Addon will automatically connect
 
 ## FAQ
 
+### Where is the data ?
+
+inside the mqtt integration (click on "devices"). after a successful run there should be a new entry named "car" or the nickname you gave the car on the website.
+
+![image](https://user-images.githubusercontent.com/30373916/196047443-add9ad0b-4f8f-429b-9a71-7ec0f5eae96e.png)
+
+if not then check the error logs output of the addon.
+
 ### Why is location not working.
 
 it should work. have a look at the attributes. only the main status says "unknown". haven't figured out yet how to fix that.
