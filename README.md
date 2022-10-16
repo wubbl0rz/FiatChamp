@@ -14,6 +14,7 @@ Example dashboard using sensors and entities provided by this addon:
 ## Prerequisites
 
 - Official Home Assistant MQTT Addon (recommended) running (or external broker). Broker connected to Home Assistant MQTT integration.
+
 ![image](https://user-images.githubusercontent.com/30373916/196045271-44287d3f-93ba-49c0-a72f-0bc92042efbb.png)
 
 ## Features
