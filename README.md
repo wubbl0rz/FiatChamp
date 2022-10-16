@@ -25,7 +25,7 @@ Example dashboard using sensors and entities provided by this addon:
 - Uses the same data source as the official app.
 - Remote commands (open doors, switch air conditioner on, ...) are supported since version 2.0. Some commands may not work with all cars. Available commands are:
   - "UpdateLocation" (updates gps location from the car) 
-  - "DeepRefresh" (gets battery charge level)
+  - "DeepRefresh" (gets battery charge % level)
   - "Blink" (blink lights)
   - "ChargeNOW" (starts charging)
   - "Trunk" (open/close trunk lock)
