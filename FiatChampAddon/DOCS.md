@@ -11,11 +11,10 @@ Example dashboard using sensors and entities provided by this addon:
 
 ![image](https://user-images.githubusercontent.com/30373916/190108698-6df2a4de-776d-45e2-8f27-1c5521f79476.png)
 
-Info: If you update from 2.0.0 to 2.0.6 there is a chance the update will fail. thats because before < 2.0.6 the addon was build by docker locally on the home assistant host and from 2.0.6 onwards its using a prebuilt image. one time reinstall will fix this.
-
 ## Prerequisites
 
-- Official Home Assistant MQTT Addon up and running. 
+- Official Home Assistant MQTT Addon (recommended) running (or external broker). Broker connected to Home Assistant MQTT integration.
+![image](https://user-images.githubusercontent.com/30373916/196045271-44287d3f-93ba-49c0-a72f-0bc92042efbb.png)
 
 ## Features
 
@@ -30,6 +29,7 @@ Info: If you update from 2.0.0 to 2.0.6 there is a chance the update will fail. 
   - "ChargeNOW" (starts charging)
   - "Trunk" (open/close trunk lock)
   - "HVAC" (turn on the temperature preconditioning in the car. __the official app does not support turning preconditioning off 😅 i found an hidden command for this but i don't know if it will work or have negative side effects. enable it by setting the "EnableDangerousCommands" option.__)
+- Convert km to miles option.
 
 ## What doesn't work (yet)?
 
@@ -56,13 +56,12 @@ Short version:
 
 ## Options / Usage
 
-Fill out the required fields in the addon configuration. 
+You dont have to configure MQTT. At startup the Addon will automatically connect to your Home Assistant MQTT Broker.
 
 - PIN is only needed if you want to send commands to your car. Its the same PIN used by the official app or website.
 - Use DEBUG carefully. It will dump many informations to the log including session tokens and sensitive informations.
-- Automatic refresh of location and battery level may drain your battery a bit more. The car have to wakeup some parts, read new values and sent them back. This will get executed every "Refresh interval" and at every command even if your car is not at home. __Recommendation:__  Better use a Home Assistant automation instead. I have setup an automation that is triggered by plugin the charger cable and then updates the battery level (by calling DeepRefresh) every 30 minutes until its 100% or charger is disconnected.
+- Automatic refresh of location and battery level may drain your battery a bit more. The car have to wakeup some parts, read new values and sent them back. This will get executed every "Refresh interval" and at every command even if your car is not at home. __Recommendation:__  Better use a Home Assistant automation instead. I have setup an automation that is triggered by plugging in the charger cable and then updates the battery level (by calling DeepRefresh) every 15 minutes until its 100% or charger is disconnected. ( see here for screenshots of my automations https://github.com/wubbl0rz/FiatChamp/issues/4#issuecomment-1271866433 )
 - Only set "Dangerous commands" if you want to use unoffical commands that are not present in the the official app.
+- Mqtt override can be used if you want to utilize an external mqtt broker. __You do not need this if you are using the official home assistant mqtt addon.__
 
-You dont have to configure MQTT. At startup the Addon will automatically connect to your Home Assistants MQTT Broker.
-
-<img src="https://user-images.githubusercontent.com/30373916/193454721-8dcfa211-58a2-4d12-95f1-87db42beeec1.png" width="700px">
+<img src="https://user-images.githubusercontent.com/30373916/196044104-a3f594d4-45d1-4436-af98-ca7dc88cec29.png" width="700px">
