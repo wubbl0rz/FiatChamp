@@ -2,8 +2,8 @@ name: "FiatChamp"
 url: "https://github.com/wubbl0rz/FiatChamp"
 description: "Connect your FIAT (uconnect) car to Home Assistant. 🚗"
 services:
-    - "mqtt:need"
-version: "2.0.13"
+    - "mqtt:want"
+version: "2.0.14"
 image: "ghcr.io/wubbl0rz/image-{arch}-fiat-champ"
 slug: "fiat_champ"
 init: false
@@ -29,6 +29,10 @@ schema:
   AutoRefreshBattery: bool
   AutoRefreshLocation: bool
   EnableDangerousCommands: bool
+  OverrideMqttUser: str?
+  OverrideMqttPw: password?
+  OverrideMqttServer: str?
+  OverrideMqttPort: int?
 arch:
   - amd64
   - armv7

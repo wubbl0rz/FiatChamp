@@ -6,7 +6,6 @@ using FiatChamp.HA;
 using Flurl.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json.Linq;
 using Serilog;
 using Serilog.Events;
 

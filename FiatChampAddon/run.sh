@@ -1,9 +1,14 @@
 #!/usr/bin/with-contenv bashio
 
-export FiatChamp_MqttServer=$(bashio::services "mqtt" "host")
-export FiatChamp_MqttUser=$(bashio::services "mqtt" "username")
-export FiatChamp_MqttPw=$(bashio::services "mqtt" "password")
-export FiatChamp_MqttPort=$(bashio::services "mqtt" "port")
+export FiatChamp_MqttUser=$(bashio::config 'OverrideMqttUser')
+export FiatChamp_MqttPw=$(bashio::config 'OverrideMqttPw')
+export FiatChamp_MqttServer=$(bashio::config 'OverrideMqttServer')
+export FiatChamp_MqttPort=$(bashio::config 'OverrideMqttPort')
+
+test "$FiatChamp_MqttUser" = "null" && export FiatChamp_MqttUser=$(bashio::services "mqtt" "username")
+test "$FiatChamp_MqttPw" = "null" && export FiatChamp_MqttPw=$(bashio::services "mqtt" "password")
+test "$FiatChamp_MqttServer" = "null" && export FiatChamp_MqttServer=$(bashio::services "mqtt" "host")
+test "$FiatChamp_MqttPort" = "null" && export FiatChamp_MqttPort=$(bashio::services "mqtt" "port")
 
 export FiatChamp_FiatUser=$(bashio::config 'FiatUser')
 export FiatChamp_FiatPw=$(bashio::config 'FiatPw')

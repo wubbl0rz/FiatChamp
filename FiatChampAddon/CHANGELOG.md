@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 2.0.14 - 2022-10-16
+- override mqtt option. only use this if you want to utilize an external mqtt broker.
+  you do not need this if you are using the official home assistant mqtt addon.
+- official mqtt addon no longer hardcoded required to start the addon. but its still the recommended way of using this addon.
+- more mqtt logging
+
 ## 2.0.13 - 2022-10-16
 - km to miles conversion
 - distance sensors export unit of measurement to home assistant (km or mi)
