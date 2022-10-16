@@ -46,6 +46,16 @@ public class SimpleMqttClient
       .Build();
 
     await _mqttClient.StartAsync(options);
+    
+    _mqttClient.ConnectedAsync += async args =>
+    {
+      Log.Information("Mqtt connection successful");
+    };
+
+    _mqttClient.ConnectingFailedAsync += async args =>
+    {
+      Log.Information("Mqtt connection failed: {0}", args.Exception);
+    };
   }
   
   public async Task Sub(string topic, Func<string, Task> callback)
