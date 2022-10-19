@@ -281,10 +281,6 @@ public class FiatClientFake : IFiatClient
   }
 }
 
-public class FiatClientApiEndpoints
-{
-}
-
 public enum FcaBrand
 {
   Fiat,
@@ -319,7 +315,7 @@ public class FiatClient : IFiatClient
     _user = user;
     _password = password;
     _brand = brand;
-
+    
     if (_brand == FcaBrand.Ram)
     {
       _loginApiKey = "3_7YjzjoSb7dYtCP5-D6FhPsCciggJFvM14hNPvXN9OsIiV1ujDqa4fNltDJYnHawO";

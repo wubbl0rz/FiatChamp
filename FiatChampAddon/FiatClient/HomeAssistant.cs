@@ -59,14 +59,26 @@ public class HaRestApi
     _token = token;
   }
   
-  public async Task<HaRestApiUnitSystem> GetUnitSystem()
+  private async Task<JObject> GetConfig()
   {
-    var result = await _url
+    return await _url
       .WithOAuthBearerToken(_token)
       .AppendPathSegment("config")
       .GetJsonAsync<JObject>();
+  }
+  
+  public async Task<string> GetTimeZone()
+  {
+    var config = await this.GetConfig();
 
-    return result["unit_system"].ToObject<HaRestApiUnitSystem>();
+    return config["time_zone"].ToString();
+  }
+  
+  public async Task<HaRestApiUnitSystem> GetUnitSystem()
+  {
+    var config = await this.GetConfig();
+
+    return config["unit_system"].ToObject<HaRestApiUnitSystem>();
   }
 
   public async Task<IReadOnlyList<HaRestApiZone>> GetZones()
@@ -182,6 +194,7 @@ public class HaSensor : HaEntity
   public string Value { get; set; } = "";
   public string Icon { get; set; } = "mdi:eye";
   public string Unit { get; set; } = "";
+  public string DeviceClass { get; set; } = "";
   
   private readonly string _stateTopic;
   private readonly string _configTopic;
@@ -199,6 +212,14 @@ public class HaSensor : HaEntity
 
   public override async Task Announce()
   {
+
+    var unitOfMeasurementJson =
+      string.IsNullOrWhiteSpace(this.Unit) ? "" : $"\"unit_of_measurement\":\"{this.Unit}\",";
+    var deviceClassJson =
+      string.IsNullOrWhiteSpace(this.DeviceClass) ? "" : $"\"device_class\":\"{this.DeviceClass}\"," ;
+    var iconJson =
+      string.IsNullOrWhiteSpace(this.DeviceClass) ? $"\"icon\":\"{this.Icon}\"," : "" ;
+
     await _mqttClient.Pub(_configTopic, $$""" 
     {
       "device":{
@@ -208,8 +229,9 @@ public class HaSensor : HaEntity
         "name":"{{ _haDevice.Name }}",
         "sw_version":"{{ _haDevice.Version }}"},
       "name":"{{ _name }}",
-      "unit_of_measurement":"{{ this.Unit }}",
-      "icon":"{{ this.Icon }}",
+      {{ unitOfMeasurementJson }}
+      {{ deviceClassJson }}
+      {{ iconJson }}
       "state_topic":"{{ _stateTopic }}",
       "unique_id":"{{ _id }}",
       "platform":"mqtt"

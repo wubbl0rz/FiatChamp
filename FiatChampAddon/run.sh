@@ -12,6 +12,7 @@ test "$FiatChamp_MqttPort" = "null" && export FiatChamp_MqttPort=$(bashio::servi
 
 export FiatChamp_CarUnknownLocation=$(bashio::config 'CarUnknownLocation')
 export FiatChamp_Brand=$(bashio::config 'Brand')
+export FiatChamp_StartDelaySeconds=$(bashio::config 'StartDelaySeconds')
 
 export FiatChamp_SupervisorToken=$SUPERVISOR_TOKEN
 

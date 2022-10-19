@@ -1,9 +1,17 @@
 # CHANGELOG
 
 ## 3.0.0 - 2022-11-02
-- support for different brands. 
-- jeep should work out of the box
-- initial support for Ram Truck
+- support for different brands. (fiat, jeep, ram, dodge)
+  - fiat works
+  - jeep should work out of the box
+  - initial support for Ram Truck
+  - dodge unknown
+- instant state restore after home assistant reboot (retain mqtt state messages)
+- battery charge now has % unit
+- time to charge now has minutes unit
+- added last update (time) sensor
+- fixed many sensor icons and add device\_class
+- added RefreshBatteryStatus button. its the same as DeepRefresh but with a better name.
 
 ## 2.0.16 - 2022-10-22
 - make mqtt user and password optional. useful when using external brokjer without authentication.

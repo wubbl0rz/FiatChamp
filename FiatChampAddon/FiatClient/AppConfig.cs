@@ -18,6 +18,7 @@ public record AppConfig
   public string SupervisorToken { get; set; } = null!;
   public FcaBrand Brand { get; set; }
   public string HomeAssistantUrl { get; set; } = "http://supervisor/core";
+  public int StartDelaySeconds { get; set; } = 1; 
   public bool AutoRefreshLocation { get; set; } = false;
   public bool AutoRefreshBattery { get; set; } = false;
   public bool EnableDangerousCommands { get; set; } = false;

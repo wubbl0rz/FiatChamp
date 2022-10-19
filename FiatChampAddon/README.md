@@ -77,12 +77,6 @@ inside the mqtt integration (click on "devices"). after a successful run there s
 
 if not then check the error logs output of the addon.
 
-### Why is location not working.
-
-it should work. have a look at the attributes. only the main status says "unknown". haven't figured out yet how to fix that.
-
-<img src="https://user-images.githubusercontent.com/30373916/196045834-0d57657a-3ef0-4361-9340-7946778158e7.png" width="300px">
-
 ### What is DeepRefresh ? How to update my battery charging level % ?
 
 DeepRefresh is the "fiat language" for battery status update. The car sents only relatively rarely battery charging level % updates. If thats too slow for you press the "DeepRefresh" button (or call it in an automation) and the car should immediately update and sent back its current battery charging level %.

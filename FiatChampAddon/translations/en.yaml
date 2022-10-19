@@ -12,6 +12,9 @@ configuration:
   CarUnknownLocation:
     name: Car unknown location status
     description: Car location sensor status if car is not in a known zone.
+  StartDelaySeconds:
+    name: Start delay in seconds
+    description: Delay start of addon. Useful if you want to wait for other addons to start first (like slow mqtt startup).
   ConvertKmToMiles:
     name: Force convert km to miles
     description: Not needed if your Home Assistant config is set to imperial system. Force try to convert kilometer values to miles.

@@ -14,7 +14,6 @@ var builder = CoconaApp.CreateBuilder();
 
 builder.Configuration.AddEnvironmentVariables("FiatChamp_");
 
-//todo: better button description
 //todo: integrate reports and events
 //todo: schedule turn charging off
 //todo: better handling of auto refresh battery and location ...
@@ -36,6 +35,9 @@ Log.Logger = new LoggerConfiguration()
   .WriteTo.Console()
   .CreateLogger();
 
+Log.Information("Delay start for seconds: {0}", appConfig.StartDelaySeconds);
+await Task.Delay(TimeSpan.FromSeconds(appConfig.StartDelaySeconds));
+
 if (appConfig.Brand is FcaBrand.Ram or FcaBrand.Dodge)
 {
   Log.Warning("{0} support is experimental.", appConfig.Brand);
@@ -47,7 +49,7 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
   Log.Debug("{0}", appConfig.Dump());
 
   IFiatClient fiatClient =
-    appConfig.UseFakeApi ? new FiatClientFake() : new FiatClient(appConfig.FiatUser, appConfig.FiatPw, FcaBrand.Ram);
+    appConfig.UseFakeApi ? new FiatClientFake() : new FiatClient(appConfig.FiatUser, appConfig.FiatPw, appConfig.Brand);
 
   var mqttClient = new SimpleMqttClient(appConfig.MqttServer,
     appConfig.MqttPort,
@@ -134,9 +136,11 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
 
             compactDetails.TryGetValue(unitKey, out var tmpUnit);
 
-            if (tmpUnit == "km" && shouldConvertKmToMiles)
+            if (tmpUnit == "km")
             {
-              if (int.TryParse(detail.Value, out var kmValue))
+              sensor.DeviceClass = "distance";
+              
+              if (shouldConvertKmToMiles && int.TryParse(detail.Value, out var kmValue))
               {
                 var miValue = Math.Round(kmValue * 0.62137, 2);
                 sensor.Value = miValue.ToString(CultureInfo.InvariantCulture);
@@ -147,7 +151,7 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
             switch (tmpUnit)
             {
               case "volts":
-                sensor.Icon = "mdi:lightning-bolt";
+                sensor.DeviceClass = "voltage";
                 sensor.Unit = "V";
                 break;
               case null or "null":
@@ -160,11 +164,24 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
           }
 
           return sensor;
-        }).ToList();
-        
+        }).ToDictionary(k => k.Name, v => v);
+
+        if (sensors.TryGetValue("car_evInfo_battery_stateOfCharge", out var stateOfChargeSensor))
+        {
+          stateOfChargeSensor.DeviceClass = "battery";
+          stateOfChargeSensor.Unit = "%";
+        }
+
+        if (sensors.TryGetValue("car_evInfo_battery_timeToFullyChargeL2", out var timeToFullyChargeSensor))
+        {
+          timeToFullyChargeSensor.DeviceClass = "duration";
+          timeToFullyChargeSensor.Unit = "min";
+        }
+
         Log.Debug("Announce sensors: {0}", sensors.Dump());
+        Log.Information("Pushing new sensors and values to Home Assistant");
         
-        await Parallel.ForEachAsync(sensors, async (sensor, token) =>
+        await Parallel.ForEachAsync(sensors.Values, async (sensor, token) =>
         {
           await sensor.Announce();
         });
@@ -172,10 +189,19 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
         Log.Debug("Waiting for home assistant to process all sensors");
         await Task.Delay(TimeSpan.FromSeconds(5), ctx.CancellationToken);
 
-        await Parallel.ForEachAsync(sensors, async (sensor, token) =>
+        await Parallel.ForEachAsync(sensors.Values, async (sensor, token) =>
         {
           await sensor.PublishState();
         });
+
+        var lastUpdate = new HaSensor(mqttClient, "LAST_UPDATE", haDevice)
+        {
+          Value = DateTime.Now.ToString("O"),
+          DeviceClass = "timestamp"
+        };
+
+        await lastUpdate.Announce();
+        await lastUpdate.PublishState();
 
         var haEntities = persistentHaEntities.GetOrAdd(vehicle.Vin, s =>
           CreateInteractiveEntities(fiatClient, mqttClient, vehicle, haDevice));
@@ -247,6 +273,12 @@ IEnumerable<HaEntity> CreateInteractiveEntities(IFiatClient fiatClient, SimpleMq
       forceLoopResetEvent.Set();
   });
 
+  var batteryRefreshButton = new HaButton(mqttClient, "RefreshBatteryStatus", haDevice, async button =>
+  {
+    if (await TrySendCommand(fiatClient, FiatCommand.DEEPREFRESH, vehicle.Vin))
+      forceLoopResetEvent.Set();
+  });
+
   var deepRefreshButton = new HaButton(mqttClient, "DeepRefresh", haDevice, async button =>
   {
     if (await TrySendCommand(fiatClient, FiatCommand.DEEPREFRESH, vehicle.Vin))
@@ -285,6 +317,13 @@ IEnumerable<HaEntity> CreateInteractiveEntities(IFiatClient fiatClient, SimpleMq
 
   return new HaEntity[]
   {
-    hvacSwitch, trunkSwitch, chargeNowButton, deepRefreshButton, locateLightsButton, updateLocationButton, lockSwitch
+    hvacSwitch,
+    trunkSwitch,
+    chargeNowButton,
+    deepRefreshButton,
+    locateLightsButton,
+    updateLocationButton,
+    lockSwitch,
+    batteryRefreshButton
   };
 }
