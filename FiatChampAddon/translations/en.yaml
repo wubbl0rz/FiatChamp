@@ -9,9 +9,12 @@ configuration:
   FiatPin:
     name: Pin
     description: Your PIN. Used for sending commands to the car.
+  CarUnknownLocation:
+    name: Car unknown location status
+    description: Car location sensor status if car is not in a known zone.
   ConvertKmToMiles:
-    name: Convert km to miles (EXPERIMENTAL)
-    description: Try to convert kilometer values to miles
+    name: Force convert km to miles
+    description: Not needed if your Home Assistant config is set to imperial system. Force try to convert kilometer values to miles.
   RefreshInterval:
     name: Refresh interval
     description: Fetch new data from api every N minutes.
@@ -19,19 +22,19 @@ configuration:
     name: Debug
     description: Enable debug logging. It will dump many informations to the log including session tokens and sensitive informations.
   EnableDangerousCommands:
-    name: Dangerous commands.
+    name: Dangerous commands
     description: Enable commands that are potentially dangerous and/or experimental. Like unlocking doors or deactivate air conditioning.
   AutoRefreshBattery:
-    name: Refresh battery status.
+    name: Refresh battery status
     description: Automatic update battery status every refresh interval.
   AutoRefreshLocation:
-    name: Refresh location.
+    name: Refresh location
     description: Automatic update location every refresh interval.
   OverrideMqttUser:
-    name: Override mqtt user.
+    name: Override mqtt user
     description: Override mqtt settings if you are using an external broker. you do not need this if you are using the official home assistant mqtt addon.
   OverrideMqttPw:
-    name: Override mqtt pw.
+    name: Override mqtt pw
     description: Override mqtt settings if you are using an external broker. you do not need this if you are using the official home assistant mqtt addon.
   OverrideMqttServer:
     name: Override mqtt server.

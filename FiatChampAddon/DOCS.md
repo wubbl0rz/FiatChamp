@@ -2,7 +2,7 @@
 
 Connect your FIAT (uconnect) car to Home Assistant. Needs a car with uconnect services enabled and valid fiat account.
 
-__Dodge or Jeep Uconnect Users: This addon may not work with your car. I do not own such a car and so i cannot test it. Some of the urls looks very "fiat only". If you want to help get this working for these cars too please open an issue.__
+__Dodge or Jeep Uconnect Users: This addon may not work with your car. I do not own such a car and so i cannot test it. Some of the urls looks very "fiat only". If you want to help get this working for these cars too please open an issue. Some Jeep cars are reported working: https://github.com/wubbl0rz/FiatChamp/issues/11#issuecomment-1280011529__
 
 I have created this addon for my own car (new Fiat Icon 500e) and its the only one i can test it with. 
 Work in progress so expect some bugs. 😅
@@ -25,7 +25,7 @@ Example dashboard using sensors and entities provided by this addon:
 - Uses the same data source as the official app.
 - Remote commands (open doors, switch air conditioner on, ...) are supported since version 2.0. Some commands may not work with all cars. Available commands are:
   - "UpdateLocation" (updates gps location from the car) 
-  - "DeepRefresh" (gets battery charge level)
+  - "DeepRefresh" (gets battery charge % level)
   - "Blink" (blink lights)
   - "ChargeNOW" (starts charging)
   - "Trunk" (open/close trunk lock)
@@ -69,8 +69,23 @@ You dont have to configure MQTT. At startup the Addon will automatically connect
 
 ## FAQ
 
+### Where is the data ?
+
+inside the mqtt integration (click on "devices"). after a successful run there should be a new entry named "car" or the nickname you gave the car on the website.
+
+![image](https://user-images.githubusercontent.com/30373916/196047443-add9ad0b-4f8f-429b-9a71-7ec0f5eae96e.png)
+
+if not then check the error logs output of the addon.
+
 ### Why is location not working.
 
 it should work. have a look at the attributes. only the main status says "unknown". haven't figured out yet how to fix that.
 
 <img src="https://user-images.githubusercontent.com/30373916/196045834-0d57657a-3ef0-4361-9340-7946778158e7.png" width="300px">
+
+### What is DeepRefresh ? How to update my battery charging level % ?
+
+DeepRefresh is the "fiat language" for battery status update. The car sents only relatively rarely battery charging level % updates. If thats too slow for you press the "DeepRefresh" button (or call it in an automation) and the car should immediately update and sent back its current battery charging level %.
+
+![image](https://user-images.githubusercontent.com/30373916/196050176-8e9405ee-0caf-4fcc-a22b-ee5acc74e86f.png)
+

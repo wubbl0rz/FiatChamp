@@ -56,7 +56,7 @@ public static class Helper
     return request;
   }
   
-  public static string Dump(this object o)
+  public static string Dump(this object? o)
   {
     try
     {
@@ -85,7 +85,7 @@ public static class Helper
     }
     catch (Exception)
     {
-      return o.GetType().ToString();
+      return o?.GetType().ToString() ?? "null";
     }
   }
 }

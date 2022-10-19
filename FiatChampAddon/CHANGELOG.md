@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 2.0.15 - 2022-10-19
+- fix location sensor status.
+- zone support. car location sensor now shows correct zone as defined in home assistant if car is in a 1000m radius of the zone. 
+- autodetect from home assistant config if km -> miles conversion is needed. force conversion option still available.
+- if using km -> miles conversion. rounded miles to .2 digits.
+- 5sec delay between adding new sensors and pushing values to home assistant.
+
 ## 2.0.14 - 2022-10-16
 - override mqtt option. only use this if you want to utilize an external mqtt broker.
   you do not need this if you are using the official home assistant mqtt addon.
