@@ -1,6 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using System.Text;
-using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 
 namespace FiatChamp;
@@ -15,6 +13,10 @@ public record AppConfig
   [Required(AllowEmptyStrings = false)] public string MqttUser { get; set; } = null!;
   [Required(AllowEmptyStrings = false)] public string MqttPw { get; set; } = null!;
   [Range(1, 1440)] public int RefreshInterval { get; set; } = 15;
+  public string CarUnknownLocation { get; set; } = "away";
+  [Required(AllowEmptyStrings = false)]
+  public string SupervisorToken { get; set; } = null!;
+  public string HomeAssistantUrl { get; set; } = "http://supervisor/core";
   public bool AutoRefreshLocation { get; set; } = false;
   public bool AutoRefreshBattery { get; set; } = false;
   public bool EnableDangerousCommands { get; set; } = false;
@@ -30,6 +32,7 @@ public record AppConfig
     var tmp = this with
     {
       FiatUser = user,
+      SupervisorToken = new string('*', this.SupervisorToken.Length),
       FiatPw = new string('*', this.FiatPw.Length),
       MqttPw = new string('*', this.MqttPw.Length),
       FiatPin = new string('*', this.FiatPin?.Length ?? 0)

@@ -1,4 +1,115 @@
+using CoordinateSharp;
+using Flurl;
+using Flurl.Http;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Serilog;
+
 namespace FiatChamp.HA;
+
+public class HaRestApiUnitSystem
+{
+  public static HaRestApiUnitSystem DEFAULT = new()
+  {
+    Length = "km",
+    AccumulatedPrecipitation = "mm",
+    Mass = "g",
+    Pressure = "Pa",
+    Temperature = "°C",
+    Volume = "L",
+    WindSpeed = "m/s"
+  };
+  
+  public string Length { get; set; }
+  public string Mass { get; set; }
+  public string Pressure { get; set; }
+  public string Temperature { get; set; }
+  public string Volume { get; set; }
+  [JsonProperty("wind_speed")] public string WindSpeed { get; set; }
+
+  [JsonProperty("accumulated_precipitation")]
+  public string AccumulatedPrecipitation { get; set; }
+}
+
+public class HaRestApiEntityState
+{
+  [JsonProperty("entity_id")] public string EntityId { get; set; } = null!;
+  public string State { get; set; } = null!;
+  public JObject Attributes { get; set; } = new ();
+  
+  public T AttrTo<T>()
+  {
+    return this.Attributes.ToObject<T>();
+  }
+}
+
+public class HaRestApiZone
+{
+  public double Latitude { get; set; }
+  public double Longitude { get; set; }
+  public long Radius { get; set; }
+  public bool Passive { get; set; }
+  public string? Icon { get; set; }
+  [JsonProperty("friendly_name")] public string FriendlyName { get; set; } = null!;
+  [JsonIgnore] public Coordinate Coordinate => new Coordinate(this.Latitude, this.Longitude);
+}
+
+public class HaRestApi
+{
+  private readonly string _url;
+  private readonly string _token;
+
+  public HaRestApi(string url, string token)
+  {
+    _url = url.AppendPathSegment("api");
+    _token = token;
+  }
+
+  public HaRestApi(string token)
+  {
+    _token = token;
+  }
+  
+  public async Task<HaRestApiUnitSystem> GetUnitSystem()
+  {
+    var result = await _url
+      .WithOAuthBearerToken(_token)
+      .AppendPathSegment("config")
+      .GetJsonAsync<JObject>();
+
+    return result["unit_system"].ToObject<HaRestApiUnitSystem>();
+  }
+
+  public async Task<IReadOnlyList<HaRestApiZone>> GetZones()
+  {
+    var states = await this.GetStates();
+    var zones = states
+      .Where(state => state.EntityId.StartsWith("zone."))
+      .Select(state => state.AttrTo<HaRestApiZone>())
+      .ToArray();
+
+    return zones;
+  }
+  
+  public async Task<IReadOnlyList<HaRestApiZone>> GetZonesAscending(Coordinate inside)
+  {
+    var zones = await this.GetZones();
+    return zones
+      .Where(zone => zone.Coordinate.Get_Distance_From_Coordinate(inside).Meters <= zone.Radius)
+      .OrderBy(zone => zone.Coordinate.Get_Distance_From_Coordinate(inside).Meters)
+      .ToArray();
+  }
+
+  public async Task<IReadOnlyList<HaRestApiEntityState>> GetStates()
+  {
+    var result = await _url
+      .WithOAuthBearerToken(_token)
+      .AppendPathSegment("states")
+      .GetJsonAsync<HaRestApiEntityState[]>();
+    
+    return result.ToArray();
+  }
+}
 
 public abstract class HaEntity
 {
@@ -29,6 +140,7 @@ public class HaDeviceTracker : HaEntity
 
   public double Lat { get; set; }
   public double Lon { get; set; }
+  public string StateValue { get; set; }
 
   public HaDeviceTracker(SimpleMqttClient mqttClient, string name, HaDevice haDevice) 
     : base(mqttClient, name, haDevice)
@@ -40,11 +152,14 @@ public class HaDeviceTracker : HaEntity
 
   public override async Task PublishState()
   {
+    await _mqttClient.Pub(_stateTopic, $"{this.StateValue}");
+    
     await _mqttClient.Pub(_attributesTopic, $$"""
     {
       "latitude": {{this.Lat}}, 
-      "longitude": {{this.Lon}}, 
-      "gps_accuracy": 1.2
+      "longitude": {{this.Lon}},
+      "source_type":"gps", 
+      "gps_accuracy": 2
     }
     
     """ );
@@ -68,7 +183,7 @@ public class HaDeviceTracker : HaEntity
     }
     
     """);
-    
+
     await Task.Delay(200);
   }
 }

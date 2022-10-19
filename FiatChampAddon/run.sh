@@ -10,6 +10,9 @@ test "$FiatChamp_MqttPw" = "null" && export FiatChamp_MqttPw=$(bashio::services 
 test "$FiatChamp_MqttServer" = "null" && export FiatChamp_MqttServer=$(bashio::services "mqtt" "host")
 test "$FiatChamp_MqttPort" = "null" && export FiatChamp_MqttPort=$(bashio::services "mqtt" "port")
 
+export FiatChamp_CarUnknownLocation=$(bashio::config 'CarUnknownLocation')
+export FiatChamp_SupervisorToken=$SUPERVISOR_TOKEN
+
 export FiatChamp_FiatUser=$(bashio::config 'FiatUser')
 export FiatChamp_FiatPw=$(bashio::config 'FiatPw')
 export FiatChamp_FiatPin=$(bashio::config 'FiatPin')
