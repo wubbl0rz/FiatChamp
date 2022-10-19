@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 3.0.0 - 2022-11-02
+- support for different brands. 
+- jeep should work out of the box
+- initial support for Ram Truck
+
 ## 2.0.16 - 2022-10-22
 - make mqtt user and password optional. useful when using external brokjer without authentication.
 

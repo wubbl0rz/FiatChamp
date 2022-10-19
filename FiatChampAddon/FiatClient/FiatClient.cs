@@ -281,6 +281,18 @@ public class FiatClientFake : IFiatClient
   }
 }
 
+public class FiatClientApiEndpoints
+{
+}
+
+public enum FcaBrand
+{
+  Fiat,
+  Ram,
+  Jeep,
+  Dodge
+}
+
 public class FiatClient : IFiatClient
 {
   private readonly string _loginApiKey = "3_mOx_J2dRgjXYCdyhchv3b5lhi54eBcdCTX4BI8MORqmZCoQWhA0mV2PTlptLGUQI";
@@ -288,21 +300,38 @@ public class FiatClient : IFiatClient
   private readonly string _loginUrl = "https://loginmyuconnect.fiat.com";
   private readonly string _tokenUrl = "https://authz.sdpr-01.fcagcv.com/v2/cognito/identity/token";
   private readonly string _apiUrl = "https://channels.sdpr-01.fcagcv.com";
-  private readonly string _authApiKey = "JWRYW7IYhW9v0RqDghQSx4UcRYRILNmc8zAuh5ys";
-  private readonly string _authUrl = "https://mfa.fcl-01.fcagcv.com";
-
+  private readonly string _authApiKey = "JWRYW7IYhW9v0RqDghQSx4UcRYRILNmc8zAuh5ys"; // for pin
+  private readonly string _authUrl = "https://mfa.fcl-01.fcagcv.com"; // for pin
+  private readonly string _locale = "de_de"; // for pin
+  private readonly RegionEndpoint _awsEndpoint = RegionEndpoint.EUWest1; 
+  
   private readonly string _user;
   private readonly string _password;
+  private readonly FcaBrand _brand;
   private readonly CookieJar _cookieJar = new();
 
   private readonly IFlurlClient _defaultHttpClient;
 
   private (string userUid, ImmutableCredentials awsCredentials)? _loginInfo = null;
 
-  public FiatClient(string user, string password)
+  public FiatClient(string user, string password, FcaBrand brand = FcaBrand.Fiat)
   {
     _user = user;
     _password = password;
+    _brand = brand;
+
+    if (_brand == FcaBrand.Ram)
+    {
+      _loginApiKey = "3_7YjzjoSb7dYtCP5-D6FhPsCciggJFvM14hNPvXN9OsIiV1ujDqa4fNltDJYnHawO";
+      _apiKey = "OgNqp2eAv84oZvMrXPIzP8mR8a6d9bVm1aaH9LqU";
+      _loginUrl = "https://login-us.ramtrucks.com";
+      _tokenUrl = "https://authz.sdpr-02.fcagcv.com/v2/cognito/identity/token";
+      _apiUrl = "https://channels.sdpr-02.fcagcv.com";
+      _authApiKey = "JWRYW7IYhW9v0RqDghQSx4UcRYRILNmc8zAuh5ys"; //for pin ... wrong for ram
+      _authUrl = "https://mfa.fcl-01.fcagcv.com"; //for pin ... wrong for ram
+      _awsEndpoint = RegionEndpoint.USEast1;
+      _locale = "en_us";
+    }
 
     _defaultHttpClient = new FlurlClient().Configure(settings =>
     {
@@ -399,7 +428,7 @@ public class FiatClient : IFiatClient
     
     identityResponse.ThrowOnError("Identity failed.");
 
-    var client = new AmazonCognitoIdentityClient(new AnonymousAWSCredentials(), RegionEndpoint.EUWest1);
+    var client = new AmazonCognitoIdentityClient(new AnonymousAWSCredentials(), _awsEndpoint);
 
     var res = await client.GetCredentialsForIdentityAsync(identityResponse.IdentityId,
       new Dictionary<string, string>()
@@ -416,10 +445,11 @@ public class FiatClient : IFiatClient
   {
     var dict = new Dictionary<string, object>()
     {
+      { "x-clientapp-name", "CWP" },
       { "x-clientapp-version", "1.0" },
       { "clientrequestid", Guid.NewGuid().ToString("N")[..16] },
       { "x-api-key", apiKey },
-      { "locale", "de_de" },
+      { "locale", _locale },
       { "x-originator-type", "web" },
     };
 
@@ -462,7 +492,7 @@ public class FiatClient : IFiatClient
     var pinAuthResponse = await _authUrl
       .AppendPathSegments("v1", "accounts", userUid, "ignite", "pin", "authenticate")
       .WithHeaders(WithAwsDefaultParameter(_authApiKey))
-      .AwsSign(awsCredentials, data)
+      .AwsSign(awsCredentials, _awsEndpoint, data)
       .PostJsonAsync(data)
       .ReceiveJson<FcaPinAuthResponse>();
 
@@ -477,7 +507,7 @@ public class FiatClient : IFiatClient
     var commandResponse = await _apiUrl
       .AppendPathSegments("v1", "accounts", userUid, "vehicles", vin, action)
       .WithHeaders(WithAwsDefaultParameter(_apiKey))
-      .AwsSign(awsCredentials, json)
+      .AwsSign(awsCredentials, _awsEndpoint, json)
       .PostJsonAsync(json)
       .ReceiveJson<FcaCommandResponse>();
 
@@ -495,7 +525,7 @@ public class FiatClient : IFiatClient
       .AppendPathSegments("v4", "accounts", userUid, "vehicles")
       .SetQueryParam("stage", "ALL")
       .WithHeaders(WithAwsDefaultParameter(_apiKey))
-      .AwsSign(awsCredentials)
+      .AwsSign(awsCredentials, _awsEndpoint)
       .GetJsonAsync<VehicleResponse>();
     
     Log.Debug("{0}", vehicleResponse.Dump());
@@ -506,7 +536,7 @@ public class FiatClient : IFiatClient
         .WithClient(_defaultHttpClient)
         .AppendPathSegments("v2", "accounts", userUid, "vehicles", vehicleResponse.Vehicles.First().Vin, "status")
         .WithHeaders(WithAwsDefaultParameter(_apiKey))
-        .AwsSign(awsCredentials)
+        .AwsSign(awsCredentials, _awsEndpoint)
         .GetJsonAsync<JObject>();
       
       Log.Debug("{0}", vehicleDetails.Dump());
@@ -517,7 +547,7 @@ public class FiatClient : IFiatClient
         .WithClient(_defaultHttpClient)
         .AppendPathSegments("v1", "accounts", userUid, "vehicles", vehicle.Vin, "location", "lastknown")
         .WithHeaders(WithAwsDefaultParameter(_apiKey))
-        .AwsSign(awsCredentials)
+        .AwsSign(awsCredentials, _awsEndpoint)
         .GetJsonAsync<VehicleLocation>();
 
       vehicle.Location = vehicleLocation;

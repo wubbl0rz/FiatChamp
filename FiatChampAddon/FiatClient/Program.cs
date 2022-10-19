@@ -36,13 +36,18 @@ Log.Logger = new LoggerConfiguration()
   .WriteTo.Console()
   .CreateLogger();
 
+if (appConfig.Brand is FcaBrand.Ram or FcaBrand.Dodge)
+{
+  Log.Warning("{0} support is experimental.", appConfig.Brand);
+}
+
 await app.RunAsync(async (CoconaAppContext ctx) =>
 {
   Log.Information("{0}", appConfig.ToStringWithoutSecrets());
   Log.Debug("{0}", appConfig.Dump());
 
   IFiatClient fiatClient =
-    appConfig.UseFakeApi ? new FiatClientFake() : new FiatClient(appConfig.FiatUser, appConfig.FiatPw);
+    appConfig.UseFakeApi ? new FiatClientFake() : new FiatClient(appConfig.FiatUser, appConfig.FiatPw, FcaBrand.Ram);
 
   var mqttClient = new SimpleMqttClient(appConfig.MqttServer,
     appConfig.MqttPort,

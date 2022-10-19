@@ -9,17 +9,6 @@ namespace FiatChamp.HA;
 
 public class HaRestApiUnitSystem
 {
-  public static HaRestApiUnitSystem DEFAULT = new()
-  {
-    Length = "km",
-    AccumulatedPrecipitation = "mm",
-    Mass = "g",
-    Pressure = "Pa",
-    Temperature = "°C",
-    Volume = "L",
-    WindSpeed = "m/s"
-  };
-  
   public string Length { get; set; }
   public string Mass { get; set; }
   public string Pressure { get; set; }

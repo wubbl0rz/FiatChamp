@@ -40,22 +40,23 @@ public static class Helper
 
     return result;
   }
-  
-  public static IFlurlRequest AwsSign(this IFlurlRequest request, ImmutableCredentials credentials, object? data = null)
+
+  public static IFlurlRequest AwsSign(this IFlurlRequest request, ImmutableCredentials credentials,
+    RegionEndpoint regionEndpoint, object? data = null)
   {
     request.BeforeCall(call =>
     {
-      var json = data == null ? "" : JsonConvert.SerializeObject(data); 
+      var json = data == null ? "" : JsonConvert.SerializeObject(data);
       call.HttpRequestMessage.Content = new StringContent(json, Encoding.UTF8, "application/json");
 
       Signer.Sign(call.HttpRequestMessage,
         null, new List<KeyValuePair<string, IEnumerable<string>>>(),
-        DateTime.Now, RegionEndpoint.EUWest1.SystemName, "execute-api", credentials);
+        DateTime.Now, regionEndpoint.SystemName, "execute-api", credentials);
     });
 
     return request;
   }
-  
+
   public static string Dump(this object? o)
   {
     try

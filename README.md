@@ -1,8 +1,11 @@
 # ![image](https://user-images.githubusercontent.com/30373916/190129327-ca33228f-9864-418a-a65c-8be4de9592bc.png)  FiatChamp 🚗 
 
-Connect your FIAT (uconnect) car to Home Assistant. Needs a car with uconnect services enabled and valid fiat account.
+Connect your FIAT, Jeep, Ram, Dodge car or truck to Home Assistant. Needs a car with uconnect services enabled and valid account.
 
-__Dodge or Jeep Uconnect Users: This addon may not work with your car. I do not own such a car and so i cannot test it. Some of the urls looks very "fiat only". If you want to help get this working for these cars too please open an issue. Some Jeep cars are reported working: https://github.com/wubbl0rz/FiatChamp/issues/11#issuecomment-1280011529__
+- Fiat: Works ✅
+- Jeep: Works ✅ (https://github.com/wubbl0rz/FiatChamp/issues/11)
+- Ram Truck: Experimental ⚠️  (https://github.com/wubbl0rz/FiatChamp/issues/13)
+- Dodge: Unknown ⛔
 
 I have created this addon for my own car (new Fiat Icon 500e) and its the only one i can test it with. 
 Work in progress so expect some bugs. 😅
@@ -13,7 +16,7 @@ Example dashboard using sensors and entities provided by this addon:
 
 ## Prerequisites
 
-- Official Home Assistant MQTT Addon (recommended) running (or external broker). Broker connected to Home Assistant MQTT integration.
+- Official Home Assistant MQTT Addon (recommended) running or external mqtt broker. Broker must be connected to Home Assistant MQTT integration.
 
 ![image](https://user-images.githubusercontent.com/30373916/196045271-44287d3f-93ba-49c0-a72f-0bc92042efbb.png)
 

@@ -16,6 +16,7 @@ public record AppConfig
   public string CarUnknownLocation { get; set; } = "away";
   [Required(AllowEmptyStrings = false)]
   public string SupervisorToken { get; set; } = null!;
+  public FcaBrand Brand { get; set; }
   public string HomeAssistantUrl { get; set; } = "http://supervisor/core";
   public bool AutoRefreshLocation { get; set; } = false;
   public bool AutoRefreshBattery { get; set; } = false;
