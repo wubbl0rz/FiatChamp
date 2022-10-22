@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 2.0.16 - 2022-10-22
+- make mqtt user and password optional. useful when using external brokjer without authentication.
+
 ## 2.0.15 - 2022-10-19
 - fix location sensor status.
 - zone (home, work etc.) support. car location sensor now shows correct zone as defined in home assistant if car is in the defined radius of the zone. 
