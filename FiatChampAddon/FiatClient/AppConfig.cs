@@ -10,8 +10,8 @@ public record AppConfig
   public string? FiatPin { get; set; }
   [Required(AllowEmptyStrings = false)] public string MqttServer { get; set; } = null!;
   [Range(1, 65536)] public int MqttPort { get; set; } = 1883;
-  [Required(AllowEmptyStrings = false)] public string MqttUser { get; set; } = null!;
-  [Required(AllowEmptyStrings = false)] public string MqttPw { get; set; } = null!;
+  public string MqttUser { get; set; } = "";
+  public string MqttPw { get; set; } = "";
   [Range(1, 1440)] public int RefreshInterval { get; set; } = 15;
   public string CarUnknownLocation { get; set; } = "away";
   [Required(AllowEmptyStrings = false)]

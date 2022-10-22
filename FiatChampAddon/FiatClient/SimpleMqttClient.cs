@@ -32,8 +32,16 @@ public class SimpleMqttClient
     var mqttClientOptions = new MqttClientOptionsBuilder()
       .WithCleanSession()
       .WithClientId(_clientId)
-      .WithTcpServer(_server, _port)
-      .WithCredentials(_user, _pass);
+      .WithTcpServer(_server, _port);
+    
+    if (string.IsNullOrWhiteSpace(_user) || string.IsNullOrWhiteSpace(_pass))
+    {
+      Log.Warning("Mqtt User/Password is EMPTY.");
+    }
+    else
+    {
+      mqttClientOptions.WithCredentials(_user, _pass);
+    }
 
     if (_useTls)
     {
