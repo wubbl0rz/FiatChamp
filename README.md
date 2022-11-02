@@ -4,8 +4,9 @@ Connect your FIAT, Jeep, Ram, Dodge car or truck to Home Assistant. Needs a vehi
 
 - Fiat: Works ✅
 - Jeep: Works ✅
-- Ram Truck: Experimental ⚠️ 
+- Ram: Experimental ⚠️ 
 - Dodge: Unknown ⛔
+- AlfaRomeo: Unknown ⛔
 
 I have created this addon for my own car (new Fiat Icon 500e) and its the only one i can test it with. 
 Work in progress so expect some bugs. 😅
@@ -23,6 +24,7 @@ Fiat: https://myuconnect.fiat.com/
 Jeep: https://myuconnect.jeep.com
 Ram: https://connect.ramtrucks.com/
 Dodge: https://connect.dodge.com
+AlfaRomeo: https://myalfaconnect.alfaromeo.com/ 
 
 ![image](https://user-images.githubusercontent.com/30373916/196045271-44287d3f-93ba-49c0-a72f-0bc92042efbb.png)
 

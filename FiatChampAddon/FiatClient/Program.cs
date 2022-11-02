@@ -38,7 +38,7 @@ Log.Logger = new LoggerConfiguration()
 Log.Information("Delay start for seconds: {0}", appConfig.StartDelaySeconds);
 await Task.Delay(TimeSpan.FromSeconds(appConfig.StartDelaySeconds));
 
-if (appConfig.Brand is FcaBrand.Ram or FcaBrand.Dodge)
+if (appConfig.Brand is FcaBrand.Ram or FcaBrand.Dodge or FcaBrand.AlfaRomeo)
 {
   Log.Warning("{0} support is experimental.", appConfig.Brand);
 }

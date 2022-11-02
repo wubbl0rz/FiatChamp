@@ -286,7 +286,8 @@ public enum FcaBrand
   Fiat,
   Ram,
   Jeep,
-  Dodge
+  Dodge,
+  AlfaRomeo
 }
 
 public class FiatClient : IFiatClient

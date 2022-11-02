@@ -27,7 +27,7 @@ schema:
   FiatUser: str
   FiatPw: password
   FiatPin: password?
-  Brand: list(Fiat|Ram|Jeep|Dodge)
+  Brand: list(Fiat|Ram|Jeep|Dodge|AlfaRomeo)
   ConvertKmToMiles: bool
   RefreshInterval: int
   Debug: bool

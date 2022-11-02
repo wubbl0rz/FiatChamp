@@ -1,8 +1,12 @@
 # ![image](https://user-images.githubusercontent.com/30373916/190129327-ca33228f-9864-418a-a65c-8be4de9592bc.png)  FiatChamp 🚗 
 
-Connect your FIAT (uconnect) car to Home Assistant. Needs a car with uconnect services enabled and valid fiat account.
+Connect your FIAT, Jeep, Ram, Dodge car or truck to Home Assistant. Needs a vehicle with enabled uconnect services and valid account.
 
-__Dodge or Jeep Uconnect Users: This addon may not work with your car. I do not own such a car and so i cannot test it. Some of the urls looks very "fiat only". If you want to help get this working for these cars too please open an issue. Some Jeep cars are reported working: https://github.com/wubbl0rz/FiatChamp/issues/11#issuecomment-1280011529__
+- Fiat: Works ✅
+- Jeep: Works ✅
+- Ram: Experimental ⚠️ 
+- Dodge: Unknown ⛔
+- AlfaRomeo: Unknown ⛔
 
 I have created this addon for my own car (new Fiat Icon 500e) and its the only one i can test it with. 
 Work in progress so expect some bugs. 😅
@@ -13,23 +17,34 @@ Example dashboard using sensors and entities provided by this addon:
 
 ## Prerequisites
 
-- Official Home Assistant MQTT Addon (recommended) running (or external broker). Broker connected to Home Assistant MQTT integration.
+- Official Home Assistant MQTT Addon (recommended) running or external mqtt broker. Broker must be connected to Home Assistant MQTT integration.
+
+It looks like there are different uconnect services. Make sure your car works with the following uconnect sites. Older vehicles that only uses mopar.com do not seem to work.
+Fiat: https://myuconnect.fiat.com/
+Jeep: https://myuconnect.jeep.com
+Ram: https://connect.ramtrucks.com/
+Dodge: https://connect.dodge.com
+AlfaRomeo: https://myalfaconnect.alfaromeo.com/ 
 
 ![image](https://user-images.githubusercontent.com/30373916/196045271-44287d3f-93ba-49c0-a72f-0bc92042efbb.png)
 
 ## Features
 
 - Imports values like battery level, tyre pressure, odometet etc. into Home Assistant.
+- Multiple Brands: Fiat, Jeep, Ram, Dodge
 - Supports multiple cars on the same account. 
 - Location tracking.
+- Home Assistant zones (home, work etc.) support.
 - Uses the same data source as the official app.
 - Remote commands (open doors, switch air conditioner on, ...) are supported since version 2.0. Some commands may not work with all cars. Available commands are:
-  - "UpdateLocation" (updates gps location from the car) 
-  - "DeepRefresh" (gets battery charge % level)
+  - "UpdateLocation" (updates gps location of the car) 
+  - "RefreshBatteryStatus" (refresh battery level %)
+  - "DeepRefresh" (same as "RefreshBatteryStatus")
   - "Blink" (blink lights)
   - "ChargeNOW" (starts charging)
   - "Trunk" (open/close trunk lock)
-  - "HVAC" (turn on the temperature preconditioning in the car. __the official app does not support turning preconditioning off 😅 i found an hidden command for this but i don't know if it will work or have negative side effects. enable it by setting the "EnableDangerousCommands" option.__)
+  - "DoorLock" (open/close doors. __See: "EnableDangerousCommands" option.__)
+  - "HVAC" (turn on the temperature preconditioning in the car. __the official app does not support turning preconditioning off 😅  See: "EnableDangerousCommands" option.__)
 - Convert km to miles option.
 
 ## What doesn't work (yet)?
@@ -77,9 +92,17 @@ inside the mqtt integration (click on "devices"). after a successful run there s
 
 if not then check the error logs output of the addon.
 
+### Why is location not working.
+
+it should work. have a look at the attributes. main status depends on the zones you configured in home assistant.
+when the car is within the radius of a predefined zone at will show the zone name as location. otherwise status "away" or a custom string.
+
+<img src="https://user-images.githubusercontent.com/30373916/196045834-0d57657a-3ef0-4361-9340-7946778158e7.png" width="300px">
+
 ### What is DeepRefresh ? How to update my battery charging level % ?
 
-DeepRefresh is the "fiat language" for battery status update. The car sents only relatively rarely battery charging level % updates. If thats too slow for you press the "DeepRefresh" button (or call it in an automation) and the car should immediately update and sent back its current battery charging level %.
+DeepRefresh is the "fiat language" for battery status update. The car sents only relatively rarely battery charging level % updates. 
+If thats too slow for you press the "RefreshBatteryStatus" or "DeepRefresh" button (or call it in an automation) and the car should immediately update and sent back its current battery charging level %.
 
 ![image](https://user-images.githubusercontent.com/30373916/196050176-8e9405ee-0caf-4fcc-a22b-ee5acc74e86f.png)
 
