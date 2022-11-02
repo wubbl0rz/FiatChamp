@@ -19,14 +19,14 @@ Example dashboard using sensors and entities provided by this addon:
 
 - Official Home Assistant MQTT Addon (recommended) running or external mqtt broker. Broker must be connected to Home Assistant MQTT integration.
 
-It looks like there are different uconnect services. Make sure your car works with the following uconnect sites. Older vehicles that only uses mopar.com do not seem to work.
+![image](https://user-images.githubusercontent.com/30373916/196045271-44287d3f-93ba-49c0-a72f-0bc92042efbb.png)
+
+It looks like there are different uconnect services. Make sure your car works with one of the following uconnect sites. Older vehicles that only uses mopar.com do not seem to work.
 - Fiat: https://myuconnect.fiat.com/
 - Jeep: https://myuconnect.jeep.com
 - Ram: https://connect.ramtrucks.com/
 - Dodge: https://connect.dodge.com
 - AlfaRomeo: https://myalfaconnect.alfaromeo.com/ 
-
-![image](https://user-images.githubusercontent.com/30373916/196045271-44287d3f-93ba-49c0-a72f-0bc92042efbb.png)
 
 ## Features
 
