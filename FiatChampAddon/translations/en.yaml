@@ -20,7 +20,7 @@ configuration:
     description: Not needed if your Home Assistant config is set to imperial system. Force try to convert kilometer values to miles.
   Brand:
     name: Brand
-    description: Jeep and Ram support is new and experimental. Dodge not supported yet.
+    description: Jeep and Ram support is new. Dodge and AlfraRomeo is experimental it may not work.
   RefreshInterval:
     name: Refresh interval
     description: Fetch new data from api every N minutes.
