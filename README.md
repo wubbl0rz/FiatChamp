@@ -31,7 +31,7 @@ It looks like there are different uconnect services. Make sure your car works wi
 ## Features
 
 - Imports values like battery level, tyre pressure, odometet etc. into Home Assistant.
-- Multiple Brands: Fiat, Jeep, Ram, Dodge
+- Multiple Brands: Fiat, Jeep, Ram, Dodge, AlfraRomeo
 - Supports multiple cars on the same account. 
 - Location tracking.
 - Home Assistant zones (home, work etc.) support.
