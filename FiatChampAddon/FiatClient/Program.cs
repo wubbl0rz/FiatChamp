@@ -49,7 +49,8 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
   Log.Debug("{0}", appConfig.Dump());
 
   IFiatClient fiatClient =
-    appConfig.UseFakeApi ? new FiatClientFake() : new FiatClient(appConfig.FiatUser, appConfig.FiatPw, appConfig.Brand);
+    appConfig.UseFakeApi ? new FiatClientFake() : 
+      new FiatClient(appConfig.FiatUser, appConfig.FiatPw, appConfig.Brand, appConfig.Region);
 
   var mqttClient = new SimpleMqttClient(appConfig.MqttServer,
     appConfig.MqttPort,

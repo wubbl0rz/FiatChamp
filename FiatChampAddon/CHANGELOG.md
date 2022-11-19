@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 3.0.1 - 2022-11-19
+- region support. some cars only work with the correct region set. default region is europe.
+
 ## 3.0.0 - 2022-11-02
 - support for different brands. (fiat, jeep, ram, dodge)
   - fiat works

@@ -1,6 +1,6 @@
 # ![image](https://user-images.githubusercontent.com/30373916/190129327-ca33228f-9864-418a-a65c-8be4de9592bc.png)  FiatChamp 🚗 
 
-Connect your FIAT, Jeep, Ram, Dodge car or truck to Home Assistant. Needs a vehicle with enabled uconnect services and valid account.
+Connect your FIAT, Jeep, Ram, Dodge, AlfaRomeo car or truck to Home Assistant. Needs a vehicle with enabled uconnect services and valid account.
 
 - Fiat: Works ✅
 - Jeep: Works ✅
@@ -19,19 +19,19 @@ Example dashboard using sensors and entities provided by this addon:
 
 - Official Home Assistant MQTT Addon (recommended) running or external mqtt broker. Broker must be connected to Home Assistant MQTT integration.
 
-It looks like there are different uconnect services. Make sure your car works with the following uconnect sites. Older vehicles that only uses mopar.com do not seem to work.
-Fiat: https://myuconnect.fiat.com/
-Jeep: https://myuconnect.jeep.com
-Ram: https://connect.ramtrucks.com/
-Dodge: https://connect.dodge.com
-AlfaRomeo: https://myalfaconnect.alfaromeo.com/ 
-
 ![image](https://user-images.githubusercontent.com/30373916/196045271-44287d3f-93ba-49c0-a72f-0bc92042efbb.png)
+
+It looks like there are different uconnect services. Make sure your car works with one of the following uconnect sites. Older vehicles that only uses mopar.com do not seem to work.
+- Fiat: https://myuconnect.fiat.com/
+- Jeep: https://myuconnect.jeep.com
+- Ram: https://connect.ramtrucks.com/
+- Dodge: https://connect.dodge.com
+- AlfaRomeo: https://myalfaconnect.alfaromeo.com/ 
 
 ## Features
 
 - Imports values like battery level, tyre pressure, odometet etc. into Home Assistant.
-- Multiple Brands: Fiat, Jeep, Ram, Dodge
+- Multiple Brands: Fiat, Jeep, Ram, Dodge, AlfraRomeo
 - Supports multiple cars on the same account. 
 - Location tracking.
 - Home Assistant zones (home, work etc.) support.
@@ -80,7 +80,7 @@ You dont have to configure MQTT. At startup the Addon will automatically connect
 - Only set "Dangerous commands" if you want to use unoffical commands that are not present in the the official app.
 - Mqtt override can be used if you want to utilize an external mqtt broker. __You do not need this if you are using the official home assistant mqtt addon.__
 
-<img src="https://user-images.githubusercontent.com/30373916/196044104-a3f594d4-45d1-4436-af98-ca7dc88cec29.png" width="700px">
+<img src="https://user-images.githubusercontent.com/30373916/199510247-dedf34f8-fa70-4788-8672-bd93da7d8325.png" width="700px">
 
 ## FAQ
 
@@ -97,7 +97,7 @@ if not then check the error logs output of the addon.
 it should work. have a look at the attributes. main status depends on the zones you configured in home assistant.
 when the car is within the radius of a predefined zone at will show the zone name as location. otherwise status "away" or a custom string.
 
-<img src="https://user-images.githubusercontent.com/30373916/196045834-0d57657a-3ef0-4361-9340-7946778158e7.png" width="300px">
+<img src="https://user-images.githubusercontent.com/30373916/199510683-91349d24-007d-49cd-a1f6-88f6bed0a54b.png" width="300px">
 
 ### What is DeepRefresh ? How to update my battery charging level % ?
 

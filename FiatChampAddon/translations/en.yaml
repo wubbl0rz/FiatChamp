@@ -21,6 +21,9 @@ configuration:
   Brand:
     name: Brand
     description: Jeep and Ram support is new. Dodge and AlfraRomeo is experimental it may not work.
+  Region:
+    name: Region
+    description: Some cars need the correct region to work.
   RefreshInterval:
     name: Refresh interval
     description: Fetch new data from api every N minutes.

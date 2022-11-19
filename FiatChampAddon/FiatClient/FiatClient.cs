@@ -290,6 +290,12 @@ public enum FcaBrand
   AlfaRomeo
 }
 
+public enum FcaRegion
+{
+  Europe,
+  America
+}
+
 public class FiatClient : IFiatClient
 {
   private readonly string _loginApiKey = "3_mOx_J2dRgjXYCdyhchv3b5lhi54eBcdCTX4BI8MORqmZCoQWhA0mV2PTlptLGUQI";
@@ -305,18 +311,20 @@ public class FiatClient : IFiatClient
   private readonly string _user;
   private readonly string _password;
   private readonly FcaBrand _brand;
+  private readonly FcaRegion _region;
   private readonly CookieJar _cookieJar = new();
 
   private readonly IFlurlClient _defaultHttpClient;
 
   private (string userUid, ImmutableCredentials awsCredentials)? _loginInfo = null;
 
-  public FiatClient(string user, string password, FcaBrand brand = FcaBrand.Fiat)
+  public FiatClient(string user, string password, FcaBrand brand = FcaBrand.Fiat, FcaRegion region = FcaRegion.Europe)
   {
     _user = user;
     _password = password;
     _brand = brand;
-    
+    _region = region;
+
     if (_brand == FcaBrand.Ram)
     {
       _loginApiKey = "3_7YjzjoSb7dYtCP5-D6FhPsCciggJFvM14hNPvXN9OsIiV1ujDqa4fNltDJYnHawO";
@@ -324,10 +332,29 @@ public class FiatClient : IFiatClient
       _loginUrl = "https://login-us.ramtrucks.com";
       _tokenUrl = "https://authz.sdpr-02.fcagcv.com/v2/cognito/identity/token";
       _apiUrl = "https://channels.sdpr-02.fcagcv.com";
-      _authApiKey = "JWRYW7IYhW9v0RqDghQSx4UcRYRILNmc8zAuh5ys"; //for pin ... wrong for ram
-      _authUrl = "https://mfa.fcl-01.fcagcv.com"; //for pin ... wrong for ram
+      _authApiKey = "JWRYW7IYhW9v0RqDghQSx4UcRYRILNmc8zAuh5ys"; // UNKNOWN
+      _authUrl = "https://mfa.fcl-01.fcagcv.com"; // UNKNOWN
       _awsEndpoint = RegionEndpoint.USEast1;
       _locale = "en_us";
+    }
+    else if (_brand == FcaBrand.Jeep)
+    {
+      _loginApiKey = "3_5qxvrevRPG7--nEXe6huWdVvF5kV7bmmJcyLdaTJ8A45XUYpaR398QNeHkd7EB1X";
+      _apiKey = "OgNqp2eAv84oZvMrXPIzP8mR8a6d9bVm1aaH9LqU";
+      _loginUrl = "https://login-us.jeep.com";
+      _tokenUrl = "https://authz.sdpr-02.fcagcv.com/v2/cognito/identity/token";
+      _apiUrl = "https://channels.sdpr-02.fcagcv.com";
+      _authApiKey = "JWRYW7IYhW9v0RqDghQSx4UcRYRILNmc8zAuh5ys"; // UNKNOWN
+      _authUrl = "https://mfa.fcl-01.fcagcv.com"; // UNKNOWN
+      _awsEndpoint = RegionEndpoint.USEast1;
+      _locale = "en_us";
+
+      if (_region == FcaRegion.Europe)
+      {
+        _loginApiKey = "3_ZvJpoiZQ4jT5ACwouBG5D1seGEntHGhlL0JYlZNtj95yERzqpH4fFyIewVMmmK7j";
+        _loginUrl = "https://login.jeep.com";
+        _awsEndpoint = RegionEndpoint.EUWest1;
+      }
     }
 
     _defaultHttpClient = new FlurlClient().Configure(settings =>
