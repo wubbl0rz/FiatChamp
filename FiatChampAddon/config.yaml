@@ -3,7 +3,7 @@ url: "https://github.com/wubbl0rz/FiatChamp"
 description: "Connect your FIAT (uconnect) car to Home Assistant. 🚗"
 services:
     - "mqtt:want"
-version: "3.0.1"
+version: "3.0.2"
 homeassistant_api: true
 image: "ghcr.io/wubbl0rz/image-{arch}-fiat-champ"
 slug: "fiat_champ"
