@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 3.0.3 - 2022-11-20
+- fixed bug with region selection
+
 ## 3.0.1 - 2022-11-19
 - region support. some cars only work with the correct region set. default region is europe.
 

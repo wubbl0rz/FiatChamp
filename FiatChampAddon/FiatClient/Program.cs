@@ -49,8 +49,9 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
   Log.Debug("{0}", appConfig.Dump());
 
   IFiatClient fiatClient =
-    appConfig.UseFakeApi ? new FiatClientFake() : 
-      new FiatClient(appConfig.FiatUser, appConfig.FiatPw, appConfig.Brand, appConfig.Region);
+    appConfig.UseFakeApi
+      ? new FiatClientFake()
+      : new FiatClient(appConfig.FiatUser, appConfig.FiatPw, appConfig.Brand, appConfig.Region);
 
   var mqttClient = new SimpleMqttClient(appConfig.MqttServer,
     appConfig.MqttPort,
@@ -72,6 +73,8 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
 
       foreach (var vehicle in await fiatClient.Fetch())
       {
+        Log.Information("FOUND CAR: {0}", vehicle.Vin);
+
         if (appConfig.AutoRefreshBattery)
         {
           await TrySendCommand(fiatClient, FiatCommand.DEEPREFRESH, vehicle.Vin);
@@ -99,7 +102,7 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
         var currentCarLocation = new Coordinate(vehicle.Location.Latitude, vehicle.Location.Longitude);
 
         var zones = await haClient.GetZonesAscending(currentCarLocation);
-        
+
         Log.Debug("Zones: {0}", zones.Dump());
 
         var tracker = new HaDeviceTracker(mqttClient, "CAR_LOCATION", haDevice)
@@ -108,7 +111,7 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
           Lon = currentCarLocation.Longitude.ToDouble(),
           StateValue = zones.FirstOrDefault()?.FriendlyName ?? appConfig.CarUnknownLocation
         };
-        
+
         Log.Information("Car is at location: {0}", tracker.Dump());
 
         Log.Debug("Announce sensor: {0}", tracker.Dump());
@@ -117,11 +120,11 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
 
         var compactDetails = vehicle.Details.Compact("car");
         var unitSystem = await haClient.GetUnitSystem();
-        
+
         Log.Information("Using unit system: {0}", unitSystem.Dump());
 
         var shouldConvertKmToMiles = (appConfig.ConvertKmToMiles || unitSystem.Length != "km");
-        
+
         Log.Information("Convert km -> miles ? {0}", shouldConvertKmToMiles);
 
         var sensors = compactDetails.Select(detail =>
@@ -130,7 +133,7 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
           {
             Value = detail.Value
           };
-          
+
           if (detail.Key.EndsWith("_value"))
           {
             var unitKey = detail.Key.Replace("_value", "_unit");
@@ -140,7 +143,7 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
             if (tmpUnit == "km")
             {
               sensor.DeviceClass = "distance";
-              
+
               if (shouldConvertKmToMiles && int.TryParse(detail.Value, out var kmValue))
               {
                 var miValue = Math.Round(kmValue * 0.62137, 2);
@@ -181,19 +184,13 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
 
         Log.Debug("Announce sensors: {0}", sensors.Dump());
         Log.Information("Pushing new sensors and values to Home Assistant");
-        
-        await Parallel.ForEachAsync(sensors.Values, async (sensor, token) =>
-        {
-          await sensor.Announce();
-        });
+
+        await Parallel.ForEachAsync(sensors.Values, async (sensor, token) => { await sensor.Announce(); });
 
         Log.Debug("Waiting for home assistant to process all sensors");
         await Task.Delay(TimeSpan.FromSeconds(5), ctx.CancellationToken);
 
-        await Parallel.ForEachAsync(sensors.Values, async (sensor, token) =>
-        {
-          await sensor.PublishState();
-        });
+        await Parallel.ForEachAsync(sensors.Values, async (sensor, token) => { await sensor.PublishState(); });
 
         var lastUpdate = new HaSensor(mqttClient, "LAST_UPDATE", haDevice)
         {
