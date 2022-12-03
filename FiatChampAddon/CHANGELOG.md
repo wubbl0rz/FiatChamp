@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 3.0.6 - 2022-12-03
+- fix car location if altitude null 
+
 ## 3.0.5 - 2022-12-03
 - fix jeep when car model is not an int.
 
