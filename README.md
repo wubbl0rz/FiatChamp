@@ -57,6 +57,8 @@ It looks like there are different uconnect services. Make sure your car works wi
 
 ## How to install
 
+### Home Assistant OS or Supervised
+
 Follow the official docs:
 
 https://www.home-assistant.io/addons/ 
@@ -70,7 +72,7 @@ Short version:
 - Refresh Page. (F5)
 - Store should show this repo now and you can install the addon.
 
-## Standalone ( NOT SUPPORTED AND NOT RECOMMENDED )
+### Standalone ( NOT SUPPORTED AND NOT RECOMMENDED )
 
 When using Home Assistant as self managed docker container (like in this issue https://github.com/wubbl0rz/FiatChamp/issues/22) you can use FiatChamp in standalone mode.
 
