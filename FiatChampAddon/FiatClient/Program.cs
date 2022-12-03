@@ -216,14 +216,14 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
       Log.Warning($"Error connecting to the FIAT API. \n" +
                   $"This can happen from time to time. Retrying in {appConfig.RefreshInterval} minutes.");
 
-      Log.Information("ERROR: {0}", httpException.Message);
-      Log.Information("STATUS: {0}", httpException.StatusCode);
+      Log.Debug("ERROR: {0}", httpException.Message);
+      Log.Debug("STATUS: {0}", httpException.StatusCode);
 
       var task = httpException.Call?.Response?.GetStringAsync();
 
       if (task != null)
       {
-        Log.Information("RESPONSE: {0}", await task);
+        Log.Debug("RESPONSE: {0}", await task);
       }
     }
     catch (Exception e)

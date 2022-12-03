@@ -107,7 +107,7 @@ public class Vehicle
   public string? Nickname { get; set; }
   public string Vin { get; set; }
   public string Company { get; set; }
-  public long Model { get; set; }
+  public string Model { get; set; }
   public string ModelDescription { get; set; }
   public long TcuType { get; set; }
   public string Make { get; set; }
