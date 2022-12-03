@@ -57,6 +57,8 @@ It looks like there are different uconnect services. Make sure your car works wi
 
 ## How to install
 
+### Home Assistant OS or Supervised
+
 Follow the official docs:
 
 https://www.home-assistant.io/addons/ 
@@ -69,6 +71,35 @@ Short version:
 - Top right three dots. Check for updates.
 - Refresh Page. (F5)
 - Store should show this repo now and you can install the addon.
+
+### Standalone ( NOT RECOMMENDED )
+
+When using Home Assistant as self managed docker container (like in this issue https://github.com/wubbl0rz/FiatChamp/issues/22) you can use FiatChamp in standalone mode. You need to update the container yourself and export all the needed environment variables. __This is for advanced users only.__
+The supervisor token can be generated on the the user profile page inside home assistant (Long-Lived Access Tokens).
+
+docker compose example:
+
+``` yaml
+version: "3.9"                                                                                                                                     
+services:
+  FiatChamp:
+    image: ghcr.io/wubbl0rz/image-amd64-fiat-champ:3.0.4
+    environment:
+      - 'STANDALONE=True'
+      - 'FiatChamp_FiatUser=user@example.com'
+      - 'FiatChamp_FiatPw=123456'
+      - 'FiatChamp_FiatPin=9999'
+      - 'FiatChamp_SupervisorToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI5NGFmMGJhZTFjYTQ0ODk2YWEzYjgzMGI5YmE4NGQxNiIsImlhdCI6MTY3MDA3Mjc
+      - 'FiatChamp_StartDelaySeconds=1'
+      - 'FiatChamp_Region=Europe'
+      - 'FiatChamp_Brand=Fiat'
+      - 'FiatChamp_CarUnknownLocation=Unknown'
+      - 'FiatChamp_ConvertKmToMiles=False'
+      - 'FiatChamp_MqttUser=mqtt'
+      - 'FiatChamp_MqttPw=123456'
+      - 'FiatChamp_MqttServer=192.168.2.132'
+      - 'FiatChamp_MqttPort=1883'
+```
 
 ## Options / Usage
 
