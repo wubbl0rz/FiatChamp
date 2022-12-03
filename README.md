@@ -72,9 +72,12 @@ Short version:
 - Refresh Page. (F5)
 - Store should show this repo now and you can install the addon.
 
-### Standalone ( NOT SUPPORTED AND NOT RECOMMENDED )
+### Standalone ( NOT RECOMMENDED )
 
-When using Home Assistant as self managed docker container (like in this issue https://github.com/wubbl0rz/FiatChamp/issues/22) you can use FiatChamp in standalone mode.
+When using Home Assistant as self managed docker container (like in this issue https://github.com/wubbl0rz/FiatChamp/issues/22) you can use FiatChamp in standalone mode. You need to update the container yourself and export all the needed environment variables. __This is for advanced users only.__
+The supervisor token can be generated on the the user profile page inside home assistant (Long-Lived Access Tokens).
+
+docker compose example:
 
 ``` yaml
 version: "3.9"                                                                                                                                     
