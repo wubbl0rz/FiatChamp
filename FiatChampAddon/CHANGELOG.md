@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 3.0.4 - 2022-12-03
+- fixed dodge login #24
+- use fiatchamp in standalone docker container #22
+
 ## 3.0.3 - 2022-11-20
 - fixed bug with region selection
 
