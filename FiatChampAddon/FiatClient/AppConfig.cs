@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace FiatChamp;
 
@@ -41,7 +42,7 @@ public record AppConfig
       FiatPin = new string('*', this.FiatPin?.Length ?? 0)
     };
 
-    return JsonConvert.SerializeObject(tmp, Formatting.Indented);
+    return JsonConvert.SerializeObject(tmp, Formatting.Indented, new StringEnumConverter());
   }
   
   public bool IsPinSet()

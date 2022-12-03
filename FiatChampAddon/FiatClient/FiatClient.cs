@@ -337,6 +337,18 @@ public class FiatClient : IFiatClient
       _awsEndpoint = RegionEndpoint.USEast1;
       _locale = "en_us";
     }
+    else if(_brand == FcaBrand.Dodge)
+    {
+      _loginApiKey = "3_etlYkCXNEhz4_KJVYDqnK1CqxQjvJStJMawBohJU2ch3kp30b0QCJtLCzxJ93N-M";
+      _apiKey = "OgNqp2eAv84oZvMrXPIzP8mR8a6d9bVm1aaH9LqU";
+      _loginUrl = "https://login-us.dodge.com";
+      _tokenUrl = "https://authz.sdpr-02.fcagcv.com/v2/cognito/identity/token";
+      _apiUrl = "https://channels.sdpr-02.fcagcv.com";
+      _authApiKey = "JWRYW7IYhW9v0RqDghQSx4UcRYRILNmc8zAuh5ys"; // UNKNOWN
+      _authUrl = "https://mfa.fcl-01.fcagcv.com"; // UNKNOWN
+      _awsEndpoint = RegionEndpoint.USEast1;
+      _locale = "en_us";
+    }
     else if (_brand == FcaBrand.Jeep)
     {
       if (_region == FcaRegion.Europe)
@@ -552,7 +564,7 @@ public class FiatClient : IFiatClient
       .WithHeaders(WithAwsDefaultParameter(_apiKey))
       .AwsSign(awsCredentials, _awsEndpoint)
       .GetJsonAsync<VehicleResponse>();
-    
+
     Log.Debug("{0}", vehicleResponse.Dump());
 
     foreach (var vehicle in vehicleResponse.Vehicles)
