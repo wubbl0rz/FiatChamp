@@ -1,6 +1,6 @@
-# ![image](https://user-images.githubusercontent.com/30373916/190129327-ca33228f-9864-418a-a65c-8be4de9592bc.png)  FiatChamp 🚗 
+# ![image](https://user-images.githubusercontent.com/30373916/190129327-ca33228f-9864-418a-a65c-8be4de9592bc.png)  FiatChamp 🚗
 
-Connect your FIAT, Jeep, Ram, Dodge, AlfaRomeo car or truck to Home Assistant. Needs a vehicle with enabled uconnect services and valid account.
+Connect your FIAT, Jeep, Ram, Dodge, AlfaRomeo car 🚗 or truck 🚚 to Home Assistant. Needs a vehicle with enabled uconnect services and valid account.
 
 - Fiat: Works ✅
 - Jeep: Works ✅
@@ -8,14 +8,14 @@ Connect your FIAT, Jeep, Ram, Dodge, AlfaRomeo car or truck to Home Assistant. N
 - Dodge: Unknown ⛔
 - AlfaRomeo: Unknown ⛔
 
-I have created this addon for my own car (new Fiat Icon 500e) and its the only one i can test it with. 
-Work in progress so expect some bugs. 😅
+I have created this addon for my own car 🚗 (new Fiat Icon 500e) and its the only one i can test it with. 
+Work in progress so expect some bugs 🐞. 😅
 
 Example dashboard using sensors and entities provided by this addon:
 
 ![image](https://user-images.githubusercontent.com/30373916/190108698-6df2a4de-776d-45e2-8f27-1c5521f79476.png)
 
-## Prerequisites
+## Prerequisites 📃
 
 - Official Home Assistant MQTT Addon (recommended) running or external mqtt broker. Broker must be connected to Home Assistant MQTT integration.
 
@@ -28,15 +28,15 @@ It looks like there are different uconnect services. Make sure your car works wi
 - Dodge: https://connect.dodge.com
 - AlfaRomeo: https://myalfaconnect.alfaromeo.com/ 
 
-## Features
+## Features ✔️
 
-- Imports values like battery level, tyre pressure, odometet etc. into Home Assistant.
+- Imports values like battery level 🔋, tyre pressure ‍💨, odometer ⏲ etc. into Home Assistant.
 - Multiple Brands: Fiat, Jeep, Ram, Dodge, AlfraRomeo
-- Supports multiple cars on the same account. 
-- Location tracking.
-- Home Assistant zones (home, work etc.) support.
-- Uses the same data source as the official app.
-- Remote commands (open doors, switch air conditioner on, ...) are supported since version 2.0. Some commands may not work with all cars. Available commands are:
+- Supports multiple cars on the same account. 🚙🚗🚕
+- Location tracking.🌍
+- Home Assistant zones (home 🏠, work 🏦 etc.) support.
+- Uses the same data source as the official app 📱.
+- Remote commands (open doors 🚪, switch air conditioner 🧊 on , ...) are supported since version 2.0. Some commands may not work with all cars. Available commands are:
   - "UpdateLocation" (updates gps location of the car) 
   - "RefreshBatteryStatus" (refresh battery level %)
   - "DeepRefresh" (same as "RefreshBatteryStatus")
@@ -47,15 +47,15 @@ It looks like there are different uconnect services. Make sure your car works wi
   - "HVAC" (turn on the temperature preconditioning in the car. __the official app does not support turning preconditioning off 😅  See: "EnableDangerousCommands" option.__)
 - Convert km to miles option.
 
-## What doesn't work (yet)?
+## What doesn't work (yet)? ❌
 
 - Eco Reports (statistics). I could not find any API yet. The official app shows it so in theory it should be accessible.
 
-## What will NEVER work?
+## What will NEVER work? ❌
 
 - Things the fiat api does not support. Like real time tracking or adjusting the music volume. Maybe they add some new features in the future. 
 
-## How to install
+## How to install 🛠️
 
 ### Home Assistant OS or Supervised
 
@@ -72,7 +72,7 @@ Short version:
 - Refresh Page. (F5)
 - Store should show this repo now and you can install the addon.
 
-### Standalone ( NOT RECOMMENDED )
+### Standalone ( NOT RECOMMENDED ⚠️ )
 
 When using Home Assistant as self managed docker container (like in this issue https://github.com/wubbl0rz/FiatChamp/issues/22) you can use FiatChamp in standalone mode. You need to update the container yourself and export all the needed environment variables. __This is for advanced users only.__
 The supervisor token can be generated on the the user profile page inside home assistant (Long-Lived Access Tokens).
@@ -113,7 +113,7 @@ You dont have to configure MQTT. At startup the Addon will automatically connect
 
 <img src="https://user-images.githubusercontent.com/30373916/199510247-dedf34f8-fa70-4788-8672-bd93da7d8325.png" width="700px">
 
-## FAQ
+## FAQ  🙋
 
 ### Where is the data ?
 
@@ -130,7 +130,7 @@ when the car is within the radius of a predefined zone at will show the zone nam
 
 <img src="https://user-images.githubusercontent.com/30373916/199510683-91349d24-007d-49cd-a1f6-88f6bed0a54b.png" width="300px">
 
-### What is DeepRefresh ? How to update my battery charging level % ?
+### What is DeepRefresh ? How to update my battery charging 🔋 level % ?
 
 DeepRefresh is the "fiat language" for battery status update. The car sents only relatively rarely battery charging level % updates. 
 If thats too slow for you press the "RefreshBatteryStatus" or "DeepRefresh" button (or call it in an automation) and the car should immediately update and sent back its current battery charging level %.
