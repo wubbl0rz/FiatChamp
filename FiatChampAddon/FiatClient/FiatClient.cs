@@ -363,8 +363,8 @@ public class FiatClient : IFiatClient
         _loginUrl = "https://login-us.jeep.com";
         _tokenUrl = "https://authz.sdpr-02.fcagcv.com/v2/cognito/identity/token";
         _apiUrl = "https://channels.sdpr-02.fcagcv.com";
-        _authApiKey = "JWRYW7IYhW9v0RqDghQSx4UcRYRILNmc8zAuh5ys"; // UNKNOWN
-        _authUrl = "https://mfa.fcl-01.fcagcv.com"; // UNKNOWN
+        _authApiKey = "fNQO6NjR1N6W0E5A6sTzR3YY4JGbuPv48Nj9aZci"; 
+        _authUrl = "https://mfa.fcl-02.fcagcv.com"; 
         _awsEndpoint = RegionEndpoint.USEast1;
         _locale = "en_us";
       }
