@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 3.0.7 - 2022-12-03
+- fixed commands for jeep america #27
+
 ## 3.0.6 - 2022-12-03
 - fix car location if altitude null 
 
