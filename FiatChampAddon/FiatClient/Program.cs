@@ -245,7 +245,12 @@ async Task<bool> TrySendCommand(IFiatClient fiatClient, FiatCommand command, str
 {
   Log.Information("SEND COMMAND {0}: ", command.Message);
 
-  var pin = appConfig.FiatPin ?? throw new Exception("PIN NOT SET");
+  if (string.IsNullOrWhiteSpace(appConfig.FiatPin))
+  {
+    throw new Exception("PIN NOT SET");
+  }
+
+  var pin = appConfig.FiatPin;
 
   if (command.IsDangerous && !appConfig.EnableDangerousCommands)
   {

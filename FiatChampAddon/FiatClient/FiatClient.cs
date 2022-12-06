@@ -571,7 +571,7 @@ public class FiatClient : IFiatClient
     {
       var vehicleDetails = await _apiUrl
         .WithClient(_defaultHttpClient)
-        .AppendPathSegments("v2", "accounts", userUid, "vehicles", vehicleResponse.Vehicles.First().Vin, "status")
+        .AppendPathSegments("v2", "accounts", userUid, "vehicles", vehicle.Vin, "status")
         .WithHeaders(WithAwsDefaultParameter(_apiKey))
         .AwsSign(awsCredentials, _awsEndpoint)
         .GetJsonAsync<JObject>();
