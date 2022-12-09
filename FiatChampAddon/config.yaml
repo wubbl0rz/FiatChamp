@@ -20,6 +20,7 @@ options:
   Debug: false
   AutoRefreshBattery: false
   AutoRefreshLocation: false
+  PrefixEntityNamesWithCarName: false
   EnableDangerousCommands: false
   CarUnknownLocation: "away"
   StartDelaySeconds: 1
@@ -34,6 +35,7 @@ schema:
   Debug: bool
   AutoRefreshBattery: bool
   AutoRefreshLocation: bool
+  PrefixEntityNamesWithCarName: bool
   EnableDangerousCommands: bool
   OverrideMqttUser: str?
   OverrideMqttPw: password?
