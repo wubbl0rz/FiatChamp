@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 3.0.8 - 2022-12-15
+- fixed fiat america login #33
+
 ## 3.0.7 - 2022-12-03
 - fixed commands for jeep america #27
 
