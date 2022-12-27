@@ -108,7 +108,11 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
         var sensors = compactDetails.Select(detail =>
         {
 
-          var binary = detail.Key.Contains("scheduleddays");
+          bool binary = false;
+          if (detail.Key.Contains("scheduleddays"))
+          {
+            binary = true;
+          }
 
           var sensor = new HaSensor(mqttClient, detail.Key, haDevice,binary)
           {
