@@ -231,8 +231,8 @@ public class HaSensor : HaEntity
                 "name":"{{ _haDevice.Name }}",
                 "sw_version":"{{ _haDevice.Version }}"},
               "name":"{{ _name }}",
-              "payload_off": False,
-              "payload_on": True,
+              "payload_off": false,
+              "payload_on": true,
               "state_topic":"{{ _stateTopic }}",
               "unique_id":"{{ _id }}",
               "platform":"mqtt"
