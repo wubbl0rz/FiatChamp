@@ -70,7 +70,7 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
 
         await Task.Delay(TimeSpan.FromSeconds(10), ctx.CancellationToken);
 
-        var vehicleName = string.IsNullOrEmpty(vehicle.Nickname) ? "KKAAar" : vehicle.Nickname;
+        var vehicleName = string.IsNullOrEmpty(vehicle.Nickname) ? "Fiat" : vehicle.Nickname;
 
         var haDevice = new HaDevice()
         {
@@ -87,7 +87,7 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
 
         Log.Debug("Zones: {0}", zones.Dump());
 
-        var tracker = new HaDeviceTracker(mqttClient, "Location", haDevice)
+        var tracker = new HaDeviceTracker(mqttClient, "500e_Location", haDevice)
         {
           Lat = currentCarLocation.Latitude.ToDouble(),
           Lon = currentCarLocation.Longitude.ToDouble(),
@@ -163,7 +163,7 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
 
         await Parallel.ForEachAsync(sensors.Values, async (sensor, token) => { await sensor.PublishState(); });
 
-        var lastUpdate = new HaSensor(mqttClient, "Last Update", haDevice)
+        var lastUpdate = new HaSensor(mqttClient, "500e_LastUpdate", haDevice)
         {
           Value = DateTime.Now.ToString("O"),
           DeviceClass = "timestamp"
