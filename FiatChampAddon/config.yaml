@@ -16,11 +16,7 @@ options:
   FiatPin: ""
   Brand: "Fiat"
   RefreshInterval: 15
-  ConvertKmToMiles: false
   Debug: false
-  AutoRefreshBattery: false
-  AutoRefreshLocation: false
-  EnableDangerousCommands: false
   CarUnknownLocation: "away"
   StartDelaySeconds: 2
 schema:
