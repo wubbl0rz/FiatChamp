@@ -166,7 +166,7 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
 
         await Parallel.ForEachAsync(sensors.Values, async (sensor, token) => { await sensor.PublishState(); });
 
-        var lastUpdate = new HaSensor(mqttClient, "500e_LastUpdate", haDevice)
+        var lastUpdate = new HaSensor(mqttClient, "500e_LastUpdate", haDevice,false)
         {
           Value = DateTime.Now.ToString("O"),
           DeviceClass = "timestamp"
