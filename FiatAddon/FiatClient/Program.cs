@@ -108,7 +108,7 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
         var sensors = compactDetails.Select(detail =>
         {
 
-          string key = detail.Key.ToLower():
+          string key = detail.Key.ToLower();
           string value = detail.Value;
           bool binary = false;
 
