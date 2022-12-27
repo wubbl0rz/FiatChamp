@@ -108,23 +108,37 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
         var sensors = compactDetails.Select(detail =>
         {
 
+          string key = detail.Key.ToLower():
+          string value = detail.Value;
           bool binary = false;
 
-          if (detail.Key.Contains("scheduledDays")
-          || detail.Key.Contains("plugInStatus")
-          || detail.Key.Contains("cabinPriority")
-          || detail.Key.Contains("chargeToFull")
-          || detail.Key.Contains("enableScheduleType")
-          || detail.Key.Contains("repeatSchedule")
+          if (key.Contains("scheduleddays")
+          || key.Contains("pluginstatus")
+          || key.Contains("cabinpriority")
+          || key.Contains("chargetofull")
+          || key.Contains("enablescheduletype")
+          || key.Contains("repeatschedule")
           )
           {
               binary = true;
           }
 
+          if (key.Contains("chargingstatus"))
+          {
+              binary = true;
+              if (detail.Value == "NOT_CHARGING")
+              {
+                value = "True";
+              }
+              else
+              {
+                value = "False";
+              }
+          }
 
           var sensor = new HaSensor(mqttClient, detail.Key, haDevice,binary)
           {
-            Value = detail.Value
+            Value = value;
           };
 
           if (detail.Key.EndsWith("_value"))
