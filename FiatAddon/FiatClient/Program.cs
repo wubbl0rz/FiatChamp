@@ -70,13 +70,12 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
 
         await Task.Delay(TimeSpan.FromSeconds(10), ctx.CancellationToken);
 
-        var vehicleName = string.IsNullOrEmpty(vehicle.Nickname) ? "Car" : vehicle.Nickname;
-        var suffix = appConfig.DevMode ? "DEV" : "";
+        var vehicleName = string.IsNullOrEmpty(vehicle.Nickname) ? "KKAAar" : vehicle.Nickname;
 
         var haDevice = new HaDevice()
         {
-          Name = vehicleName + suffix,
-          Identifier = vehicle.Vin + suffix,
+          Name = vehicleName,
+          Identifier = vehicle.Vin,
           Manufacturer = vehicle.Make,
           Model = vehicle.ModelDescription,
           Version = "1.0"
