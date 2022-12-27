@@ -37,4 +37,4 @@ schema:
   StartDelaySeconds: int?
 arch:
   - amd64
-  - armv7
+
