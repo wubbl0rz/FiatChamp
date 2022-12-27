@@ -138,7 +138,7 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
 
           var sensor = new HaSensor(mqttClient, detail.Key, haDevice,binary)
           {
-            Value = value;
+            Value = value
           };
 
           if (detail.Key.EndsWith("_value"))
