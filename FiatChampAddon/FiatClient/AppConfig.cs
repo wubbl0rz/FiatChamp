@@ -20,7 +20,7 @@ public record AppConfig
   public FcaBrand Brand { get; set; }
   public FcaRegion Region { get; set; } = FcaRegion.Europe;
   public string HomeAssistantUrl { get; set; } = "http://supervisor/core";
-  public int StartDelaySeconds { get; set; } = 1; 
+  public int StartDelaySeconds { get; set; } = 2; 
   public bool AutoRefreshLocation { get; set; } = false;
   public bool AutoRefreshBattery { get; set; } = false;
   public bool EnableDangerousCommands { get; set; } = false;
