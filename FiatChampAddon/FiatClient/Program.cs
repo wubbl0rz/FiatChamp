@@ -308,33 +308,49 @@ IEnumerable<HaEntity> CreateInteractiveEntities(IFiatClient fiatClient, SimpleMq
       forceLoopResetEvent.Set();
   });
 
-  var trunkSwitch = new HaSwitch(mqttClient, "Trunk", haDevice, async sw =>
+  var trunkLockButton = new HaButton(mqttClient, "TrunkLock", haDevice, async button =>
   {
-    if (await TrySendCommand(fiatClient, sw.IsOn ? FiatCommand.ROTRUNKUNLOCK : FiatCommand.ROTRUNKLOCK, vehicle.Vin))
+    if (await TrySendCommand(fiatClient, FiatCommand.ROTRUNKLOCK, vehicle.Vin))
+      forceLoopResetEvent.Set();
+  });
+  
+   var trunkUnLockButton = new HaButton(mqttClient, "TrunkUnLock", haDevice, async button =>
+  {
+    if (await TrySendCommand(fiatClient, FiatCommand.ROTRUNKUNLOCK, vehicle.Vin))
       forceLoopResetEvent.Set();
   });
 
-  var hvacSwitch = new HaSwitch(mqttClient, "HVAC", haDevice, async sw =>
+  var hvacButton = new HaButton(mqttClient, "HVAC", haDevice, async button =>
   {
-    if (await TrySendCommand(fiatClient, sw.IsOn ? FiatCommand.ROPRECOND : FiatCommand.ROPRECOND_OFF, vehicle.Vin))
+    if (await TrySendCommand(fiatClient, FiatCommand.ROPRECOND, vehicle.Vin))
+      forceLoopResetEvent.Set();
+  });
+  
+  
+  var lockButton = new HaButton(mqttClient, "DoorLock", haDevice, async button =>
+  {
+    if (await TrySendCommand(fiatClient, FiatCommand.RDL, vehicle.Vin))
+      forceLoopResetEvent.Set();
+  });
+  
+  var unLockButton = new HaButton(mqttClient, "DoorUnLock", haDevice, async button =>
+  {
+    if (await TrySendCommand(fiatClient, FiatCommand.RDU, vehicle.Vin))
       forceLoopResetEvent.Set();
   });
 
-  var lockSwitch = new HaSwitch(mqttClient, "DoorLock", haDevice, async sw =>
-  {
-    if (await TrySendCommand(fiatClient, sw.IsOn ? FiatCommand.RDL : FiatCommand.RDU, vehicle.Vin))
-      forceLoopResetEvent.Set();
-  });
 
   return new HaEntity[]
   {
-    hvacSwitch,
-    trunkSwitch,
+    hvacButton,
+    trunkLockButton,
+    trunkUnLockButton,
     chargeNowButton,
     deepRefreshButton,
     locateLightsButton,
     updateLocationButton,
-    lockSwitch,
+    lockButton,
+    unLockButton,
     batteryRefreshButton
   };
 }
