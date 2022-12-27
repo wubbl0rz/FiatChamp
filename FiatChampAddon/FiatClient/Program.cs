@@ -202,7 +202,7 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
         await lastUpdate.PublishState();
 
         var haEntities = persistentHaEntities.GetOrAdd(vehicle.Vin, s =>
-          CreateInteractiveEntities(fiatClient, mqttClient, vehicle, haDevice));
+          CreateInteractiveEntities(ctx,fiatClient, mqttClient, vehicle, haDevice));
 
         foreach (var haEntity in haEntities)
         {
@@ -268,7 +268,7 @@ async Task<bool> TrySendCommand(IFiatClient fiatClient, FiatCommand command, str
   return true;
 }
 
-IEnumerable<HaEntity> CreateInteractiveEntities(IFiatClient fiatClient, SimpleMqttClient mqttClient, Vehicle vehicle,
+IEnumerable<HaEntity> CreateInteractiveEntities(CoconaAppContext ctx,IFiatClient fiatClient, SimpleMqttClient mqttClient, Vehicle vehicle,
   HaDevice haDevice)
 {
   var updateLocationButton = new HaButton(mqttClient, "UpdateLocation", haDevice, async button =>
