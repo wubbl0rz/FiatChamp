@@ -255,7 +255,7 @@ IEnumerable<HaEntity> CreateInteractiveEntities(CoconaAppContext ctx,IFiatClient
   {
     if (await TrySendCommand(fiatClient, FiatCommand.VF, vehicle.Vin))
     {
-      await Task.Delay(TimeSpan.FromSeconds(5), ctx.CancellationToken);
+      await Task.Delay(TimeSpan.FromSeconds(3), ctx.CancellationToken);
       forceLoopResetEvent.Set();
     }
   });
@@ -264,14 +264,14 @@ IEnumerable<HaEntity> CreateInteractiveEntities(CoconaAppContext ctx,IFiatClient
   {
     if (await TrySendCommand(fiatClient, FiatCommand.DEEPREFRESH, vehicle.Vin))
     {
-      await Task.Delay(TimeSpan.FromSeconds(5), ctx.CancellationToken);
+      await Task.Delay(TimeSpan.FromSeconds(3), ctx.CancellationToken);
       forceLoopResetEvent.Set();
     }
   });
 
-  var locateLightsButton = new HaButton(mqttClient, "Blink", haDevice, async button =>
+  var lightsButton = new HaButton(mqttClient, "Light", haDevice, async button =>
   {
-    if (await TrySendCommand(fiatClient, FiatCommand.HBLF, vehicle.Vin))
+    if (await TrySendCommand(fiatClient, FiatCommand.ROLIGHTS, vehicle.Vin))
     {
       forceLoopResetEvent.Set();
     }
@@ -318,7 +318,7 @@ IEnumerable<HaEntity> CreateInteractiveEntities(CoconaAppContext ctx,IFiatClient
     hvacButton,
     chargeNowButton,
     deepRefreshButton,
-    locateLightsButton,
+    lightsButton,
     updateLocationButton,
     lockButton,
     unLockButton,
