@@ -124,7 +124,7 @@ public abstract class HaEntity
   protected HaEntity(SimpleMqttClient mqttClient, string name, HaDevice haDevice)
   {
     _mqttClient = mqttClient;
-    _name = $"{haDevice.Name}_{name}";
+    _name = $"{haDevice.Name} {name}";
     _haDevice = haDevice;
     _id = $"{haDevice.Identifier}_{name}";
   }
