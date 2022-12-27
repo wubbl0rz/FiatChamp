@@ -198,11 +198,14 @@ public class HaSensor : HaEntity
   
   private readonly string _stateTopic;
   private readonly string _configTopic;
+  private readonly bool _binary;
 
-  public HaSensor(SimpleMqttClient mqttClient, string name, HaDevice haDevice) : base(mqttClient, name, haDevice)
+  public HaSensor(SimpleMqttClient mqttClient, string name, HaDevice haDevice, bool binary = false) : base(mqttClient, name, haDevice)
   {
-    _stateTopic = $"homeassistant/sensor/{_id}/state";
-    _configTopic = $"homeassistant/sensor/{_id}/config";
+    _binary = binary;
+    var typeSensor = $"{(_binary ? "binary_sensor" : "sensor")}";
+    _stateTopic = $"homeassistant/{typeSensor}/{_id}/state";
+    _configTopic = $"homeassistant/{typeSensor}/{_id}/config";
   }
 
   public override async Task PublishState()
@@ -213,31 +216,56 @@ public class HaSensor : HaEntity
   public override async Task Announce()
   {
 
-    var unitOfMeasurementJson =
-      string.IsNullOrWhiteSpace(this.Unit) ? "" : $"\"unit_of_measurement\":\"{this.Unit}\",";
-    var deviceClassJson =
-      string.IsNullOrWhiteSpace(this.DeviceClass) ? "" : $"\"device_class\":\"{this.DeviceClass}\"," ;
-    var iconJson =
-      string.IsNullOrWhiteSpace(this.DeviceClass) ? $"\"icon\":\"{this.Icon}\"," : "" ;
-
-    await _mqttClient.Pub(_configTopic, $$""" 
+    if (_binary)
     {
-      "device":{
-        "identifiers":["{{ _haDevice.Identifier }}"],
-        "manufacturer":"{{ _haDevice.Manufacturer }}", 
-        "model":"{{ _haDevice.Model }}",
-        "name":"{{ _haDevice.Name }}",
-        "sw_version":"{{ _haDevice.Version }}"},
-      "name":"{{ _name }}",
-      {{ unitOfMeasurementJson }}
-      {{ deviceClassJson }}
-      {{ iconJson }}
-      "state_topic":"{{ _stateTopic }}",
-      "unique_id":"{{ _id }}",
-      "platform":"mqtt"
+        await _mqttClient.Pub(_configTopic, $$""" 
+            {
+              "device":{
+                "identifiers":["{{ _haDevice.Identifier }}"],
+                "manufacturer":"{{ _haDevice.Manufacturer }}", 
+                "model":"{{ _haDevice.Model }}",
+                "name":"{{ _haDevice.Name }}",
+                "sw_version":"{{ _haDevice.Version }}"},
+              "name":"{{ _name }}",
+              "payload_off": False,
+              "payload_on": True,
+              "state_topic":"{{ _stateTopic }}",
+              "unique_id":"{{ _id }}",
+              "platform":"mqtt"
+            }
+            
+            """);
     }
-    
-    """);
+    else
+    {
+      var unitOfMeasurementJson =
+      string.IsNullOrWhiteSpace(this.Unit) ? "" : $"\"unit_of_measurement\":\"{this.Unit}\",";
+      var deviceClassJson =
+        string.IsNullOrWhiteSpace(this.DeviceClass) ? "" : $"\"device_class\":\"{this.DeviceClass}\"," ;
+      var iconJson =
+        string.IsNullOrWhiteSpace(this.DeviceClass) ? $"\"icon\":\"{this.Icon}\"," : "" ;
+
+      await _mqttClient.Pub(_configTopic, $$""" 
+          {
+            "device":{
+              "identifiers":["{{ _haDevice.Identifier }}"],
+              "manufacturer":"{{ _haDevice.Manufacturer }}", 
+              "model":"{{ _haDevice.Model }}",
+              "name":"{{ _haDevice.Name }}",
+              "sw_version":"{{ _haDevice.Version }}"},
+            "name":"{{ _name }}",
+            {{ unitOfMeasurementJson }}
+            {{ deviceClassJson }}
+            {{ iconJson }}
+            "state_topic":"{{ _stateTopic }}",
+            "unique_id":"{{ _id }}",
+            "platform":"mqtt"
+          }
+          
+          """);
+
+    }
+
 
     await Task.Delay(200);
   }
