@@ -8,6 +8,8 @@ jobs:
     strategy:
       matrix:
         include:
+          - arch: "armv7"
+            rid: "linux-musl-arm"
           - arch: "amd64"
             rid: "linux-musl-x64"
     runs-on: ubuntu-latest
