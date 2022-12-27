@@ -1,10 +1,7 @@
 name: .NET
 
 on:
-  push:
-    branches: 
-      - release
-      - fix
+  workflow_dispatch:
 
 jobs:
   build:
