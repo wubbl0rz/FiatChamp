@@ -26,6 +26,7 @@ if [ -z ${STANDALONE+x} ]; then
   
   export FiatChamp_AutoRefreshLocation=$(bashio::config 'AutoRefreshLocation')
   export FiatChamp_AutoRefreshBattery=$(bashio::config 'AutoRefreshBattery')
+  export FiatChamp_PrefixEntityNamesWithCarName=$(bashio::config 'PrefixEntityNamesWithCarName')
   export FiatChamp_EnableDangerousCommands=$(bashio::config 'EnableDangerousCommands')
   
   export FiatChamp_Debug=$(bashio::config 'Debug')

@@ -121,10 +121,10 @@ public abstract class HaEntity
   
   public string Name => _name;
 
-  protected HaEntity(SimpleMqttClient mqttClient, string name, HaDevice haDevice)
+  protected HaEntity(SimpleMqttClient mqttClient, string name, bool prefixNameWithCar, HaDevice haDevice)
   {
     _mqttClient = mqttClient;
-    _name = name;
+    _name = prefixNameWithCar ? $"{haDevice.Name}_{name}" : name;
     _haDevice = haDevice;
     _id = $"{haDevice.Identifier}_{name}";
   }
@@ -143,8 +143,8 @@ public class HaDeviceTracker : HaEntity
   public double Lon { get; set; }
   public string StateValue { get; set; }
 
-  public HaDeviceTracker(SimpleMqttClient mqttClient, string name, HaDevice haDevice) 
-    : base(mqttClient, name, haDevice)
+  public HaDeviceTracker(SimpleMqttClient mqttClient, string name, bool prefixNameWithCar, HaDevice haDevice) 
+    : base(mqttClient, name, prefixNameWithCar, haDevice)
   {
     _stateTopic = $"homeassistant/sensor/{_id}/state";
     _configTopic = $"homeassistant/sensor/{_id}/config";
@@ -199,7 +199,8 @@ public class HaSensor : HaEntity
   private readonly string _stateTopic;
   private readonly string _configTopic;
 
-  public HaSensor(SimpleMqttClient mqttClient, string name, HaDevice haDevice) : base(mqttClient, name, haDevice)
+  public HaSensor(SimpleMqttClient mqttClient, string name, bool prefixNameWithCar, HaDevice haDevice) 
+        : base(mqttClient, name, prefixNameWithCar, haDevice)
   {
     _stateTopic = $"homeassistant/sensor/{_id}/state";
     _configTopic = $"homeassistant/sensor/{_id}/config";
@@ -248,8 +249,8 @@ public class HaButton : HaEntity
   private readonly string _commandTopic;
   private readonly string _configTopic;
 
-  public HaButton(SimpleMqttClient mqttClient, string name, HaDevice haDevice, Func<HaButton, Task> onPressedCommand)
-    : base(mqttClient, name, haDevice)
+  public HaButton(SimpleMqttClient mqttClient, string name, bool prefixNameWithCar, HaDevice haDevice, Func<HaButton, Task> onPressedCommand)
+    : base(mqttClient, name, prefixNameWithCar, haDevice)
   {
     _commandTopic = $"homeassistant/button/{_id}/set";
     _configTopic = $"homeassistant/button/{_id}/config";
@@ -299,8 +300,8 @@ public class HaSwitch : HaEntity
     _ = this.PublishState();
   }
 
-  public HaSwitch(SimpleMqttClient mqttClient, string name, HaDevice haDevice, Func<HaSwitch, Task> onSwitchCommand) 
-    : base(mqttClient, name, haDevice)
+  public HaSwitch(SimpleMqttClient mqttClient, string name, bool prefixNameWithCar, HaDevice haDevice, Func<HaSwitch, Task> onSwitchCommand) 
+    : base(mqttClient, name, prefixNameWithCar, haDevice)
   {
     _commandTopic = $"homeassistant/switch/{_id}/set";
     _stateTopic = $"homeassistant/switch/{_id}/state";

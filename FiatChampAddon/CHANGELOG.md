@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 3.x.x - yyyy-mm-dd
+- added option to prefix entity names with the name of the car
+
 ## 3.0.8 - 2022-12-15
 - fixed fiat america login #33
 
