@@ -274,76 +274,74 @@ IEnumerable<HaEntity> CreateInteractiveEntities(IFiatClient fiatClient, SimpleMq
   var updateLocationButton = new HaButton(mqttClient, "UpdateLocation", haDevice, async button =>
   {
     if (await TrySendCommand(fiatClient, FiatCommand.VF, vehicle.Vin))
+    {
+      await Task.Delay(TimeSpan.FromSeconds(10), ctx.CancellationToken);
       forceLoopResetEvent.Set();
-  });
-
-  var batteryRefreshButton = new HaButton(mqttClient, "RefreshBatteryStatus", haDevice, async button =>
-  {
-    if (await TrySendCommand(fiatClient, FiatCommand.DEEPREFRESH, vehicle.Vin))
-      forceLoopResetEvent.Set();
+    }
   });
 
   var deepRefreshButton = new HaButton(mqttClient, "DeepRefresh", haDevice, async button =>
   {
     if (await TrySendCommand(fiatClient, FiatCommand.DEEPREFRESH, vehicle.Vin))
+    {
+      await Task.Delay(TimeSpan.FromSeconds(10), ctx.CancellationToken);
       forceLoopResetEvent.Set();
+    }
   });
 
   var locateLightsButton = new HaButton(mqttClient, "Blink", haDevice, async button =>
   {
     if (await TrySendCommand(fiatClient, FiatCommand.HBLF, vehicle.Vin))
+    {
       forceLoopResetEvent.Set();
+    }
   });
 
   var chargeNowButton = new HaButton(mqttClient, "ChargeNOW", haDevice, async button =>
   {
     if (await TrySendCommand(fiatClient, FiatCommand.CNOW, vehicle.Vin))
+    {
+      await Task.Delay(TimeSpan.FromSeconds(10), ctx.CancellationToken);
       forceLoopResetEvent.Set();
+    }
   });
 
-  var trunkLockButton = new HaButton(mqttClient, "TrunkLock", haDevice, async button =>
-  {
-    if (await TrySendCommand(fiatClient, FiatCommand.ROTRUNKLOCK, vehicle.Vin))
-      forceLoopResetEvent.Set();
-  });
-  
-   var trunkUnLockButton = new HaButton(mqttClient, "TrunkUnLock", haDevice, async button =>
-  {
-    if (await TrySendCommand(fiatClient, FiatCommand.ROTRUNKUNLOCK, vehicle.Vin))
-      forceLoopResetEvent.Set();
-  });
+
 
   var hvacButton = new HaButton(mqttClient, "HVAC", haDevice, async button =>
   {
     if (await TrySendCommand(fiatClient, FiatCommand.ROPRECOND, vehicle.Vin))
+    {
       forceLoopResetEvent.Set();
+    }
   });
   
   
   var lockButton = new HaButton(mqttClient, "DoorLock", haDevice, async button =>
   {
     if (await TrySendCommand(fiatClient, FiatCommand.RDL, vehicle.Vin))
+    {
       forceLoopResetEvent.Set();
+    }
   });
   
   var unLockButton = new HaButton(mqttClient, "DoorUnLock", haDevice, async button =>
   {
     if (await TrySendCommand(fiatClient, FiatCommand.RDU, vehicle.Vin))
+    {
       forceLoopResetEvent.Set();
+    }
   });
 
 
   return new HaEntity[]
   {
     hvacButton,
-    trunkLockButton,
-    trunkUnLockButton,
     chargeNowButton,
     deepRefreshButton,
     locateLightsButton,
     updateLocationButton,
     lockButton,
     unLockButton,
-    batteryRefreshButton
   };
 }
