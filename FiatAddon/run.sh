@@ -1,19 +1,11 @@
 #!/usr/bin/with-contenv bashio
 
 if [ -z ${STANDALONE+x} ]; then
-  export FiatUconnect_MqttUser=$(bashio::config 'OverrideMqttUser')
-  export FiatUconnect_MqttPw=$(bashio::config 'OverrideMqttPw')
-  export FiatUconnect_MqttServer=$(bashio::config 'OverrideMqttServer')
-  export FiatUconnect_MqttPort=$(bashio::config 'OverrideMqttPort')
+  export FiatUconnect_MqttUser=$(bashio::services "mqtt" "username")
+  export FiatUconnect_MqttPw=$(bashio::services "mqtt" "password")
+  export FiatUconnect_MqttServer=$(bashio::services "mqtt" "host")
+  export FiatUconnect_MqttPort=$(bashio::services "mqtt" "port")
   
-  test "$FiatUconnect_MqttUser" = "null" && export FiatUconnect_MqttUser=$(bashio::services "mqtt" "username")
-  test "$FiatUconnect_MqttPw" = "null" && export FiatUconnect_MqttPw=$(bashio::services "mqtt" "password")
-  test "$FiatUconnect_MqttServer" = "null" && export FiatUconnect_MqttServer=$(bashio::services "mqtt" "host")
-  test "$FiatUconnect_MqttPort" = "null" && export FiatUconnect_MqttPort=$(bashio::services "mqtt" "port")
-  
-  export FiatUconnect_CarUnknownLocation=$(bashio::config 'CarUnknownLocation')
-  export FiatUconnect_Brand=$(bashio::config 'Brand')
-  export FiatUconnect_Region=$(bashio::config 'Region')
   export FiatUconnect_StartDelaySeconds=$(bashio::config 'StartDelaySeconds')
   
   export FiatUconnect_SupervisorToken=$SUPERVISOR_TOKEN

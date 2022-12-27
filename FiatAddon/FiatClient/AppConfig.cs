@@ -14,15 +14,13 @@ public record AppConfig
   public string MqttUser { get; set; } = "";
   public string MqttPw { get; set; } = "";
   [Range(1, 1440)] public int RefreshInterval { get; set; } = 15;
-  public string CarUnknownLocation { get; set; } = "away";
+  
   [Required(AllowEmptyStrings = false)]
   public string SupervisorToken { get; set; } = null!;
-  public FcaBrand Brand { get; set; }
-  public FcaRegion Region { get; set; } = FcaRegion.Europe;
+
   public string HomeAssistantUrl { get; set; } = "http://supervisor/core";
   public int StartDelaySeconds { get; set; } = 2; 
-  public bool DevMode { get; set; } = false;
-  public bool UseFakeApi { get; set; } = false;
+
   public bool Debug { get; set; } = false;
 
   public string ToStringWithoutSecrets()

@@ -48,16 +48,13 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
   Log.Information("{0}", appConfig.ToStringWithoutSecrets());
   Log.Debug("{0}", appConfig.Dump());
 
-  IFiatClient fiatClient =
-    appConfig.UseFakeApi
-      ? new FiatClientFake()
-      : new FiatClient(appConfig.FiatUser, appConfig.FiatPw, appConfig.Brand, appConfig.Region);
+  IFiatClient fiatClient = new FiatClient(appConfig.FiatUser, appConfig.FiatPw);
 
   var mqttClient = new SimpleMqttClient(appConfig.MqttServer,
     appConfig.MqttPort,
     appConfig.MqttUser,
     appConfig.MqttPw,
-    appConfig.DevMode ? "FiatUconnectDEV" : "FiatUconnect");
+    "FiatUconnect");
 
   await mqttClient.Connect();
 
@@ -99,7 +96,7 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
         {
           Lat = currentCarLocation.Latitude.ToDouble(),
           Lon = currentCarLocation.Longitude.ToDouble(),
-          StateValue = zones.FirstOrDefault()?.FriendlyName ?? appConfig.CarUnknownLocation
+          StateValue = zones.FirstOrDefault()?.FriendlyName ?? "Away"
         };
 
         Log.Information("Car is at location: {0}", tracker.Dump());
