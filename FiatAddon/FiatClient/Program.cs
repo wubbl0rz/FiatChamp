@@ -141,9 +141,9 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
             Value = value
           };
 
-          if (detail.Key.EndsWith("_value"))
+          if (key.EndsWith("_value"))
           {
-            var unitKey = detail.Key.Replace("_value", "_unit");
+            var unitKey = key.Replace("_value", "_unit");
 
             compactDetails.TryGetValue(unitKey, out var tmpUnit);
 
@@ -166,17 +166,23 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
             }
           }
 
-          if (detail.Key.EndsWith("evInfo_battery_stateOfCharge"))
+          if (key.Contains("battery_stateofcharge"))
           {
               sensor.DeviceClass = "battery";
               sensor.Unit = "%";
           }
 
-          if (detail.Key.Contains("evInfo_battery_timeToFullyChargeL"))
+          if (key.Contains("battery_timetofullycharge"))
           {
               sensor.DeviceClass = "duration";
               sensor.Unit = "min";
           }
+
+          if (key.Contains("chargingstatus"))
+          {
+              sensor.DeviceClass = "battery_charging";
+          }
+
 
           return sensor;
         }).ToDictionary(k => k.Name, v => v);
