@@ -3,4 +3,5 @@ obj
 build
 build_*
 .idea
+.vscode
 Folder.DotSettings.user
