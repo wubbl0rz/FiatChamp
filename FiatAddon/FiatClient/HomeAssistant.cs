@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Serilog;
 
-namespace FiatChamp.HA;
+namespace FiatUconnect.HA;
 
 public class HaRestApiUnitSystem
 {

@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Serilog;
 
-namespace FiatChamp;
+namespace FiatUconnect;
 
 public interface IFiatClient
 {

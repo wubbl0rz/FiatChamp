@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace FiatChamp;
+namespace FiatUconnect;
 
 public record AppConfig
 {
@@ -21,9 +21,6 @@ public record AppConfig
   public FcaRegion Region { get; set; } = FcaRegion.Europe;
   public string HomeAssistantUrl { get; set; } = "http://supervisor/core";
   public int StartDelaySeconds { get; set; } = 2; 
-  public bool AutoRefreshLocation { get; set; } = false;
-  public bool AutoRefreshBattery { get; set; } = false;
-  public bool ConvertKmToMiles { get; set; } = false;
   public bool DevMode { get; set; } = false;
   public bool UseFakeApi { get; set; } = false;
   public bool Debug { get; set; } = false;

@@ -1,4 +1,4 @@
-public class FiatCommand
+public class FiatUconnect
 {
   public static readonly FiatCommand DEEPREFRESH = new() { Action = "ev", Message = "DEEPREFRESH" };
   public static readonly FiatCommand VF = new() { Action = "location", Message = "VF" };

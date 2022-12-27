@@ -2,8 +2,8 @@
 using System.Globalization;
 using Cocona;
 using CoordinateSharp;
-using FiatChamp;
-using FiatChamp.HA;
+using FiatUconnect;
+using FiatUconnect.HA;
 using Flurl.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,7 +12,7 @@ using Serilog.Events;
 
 var builder = CoconaApp.CreateBuilder();
 
-builder.Configuration.AddEnvironmentVariables("FiatChamp_");
+builder.Configuration.AddEnvironmentVariables("FiatUconnect_");
 
 //todo: integrate reports and events
 //todo: schedule turn charging off
@@ -57,7 +57,7 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
     appConfig.MqttPort,
     appConfig.MqttUser,
     appConfig.MqttPw,
-    appConfig.DevMode ? "FiatChampDEV" : "FiatChamp");
+    appConfig.DevMode ? "FiatUconnectDEV" : "FiatUconnect");
 
   await mqttClient.Connect();
 

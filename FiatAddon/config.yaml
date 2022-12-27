@@ -28,8 +28,6 @@ schema:
   ConvertKmToMiles: bool
   RefreshInterval: int
   Debug: bool
-  AutoRefreshBattery: bool
-  AutoRefreshLocation: bool
   EnableDangerousCommands: bool
   OverrideMqttUser: str?
   OverrideMqttPw: password?

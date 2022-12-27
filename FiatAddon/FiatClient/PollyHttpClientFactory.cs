@@ -3,7 +3,7 @@ using Flurl.Http.Configuration;
 using Polly;
 using Serilog;
 
-namespace FiatChamp;
+namespace FiatUconnect;
 
 public class PollyHttpClientFactory : DefaultHttpClientFactory
 {
