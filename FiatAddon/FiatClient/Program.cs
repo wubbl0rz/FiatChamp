@@ -87,7 +87,7 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
 
         Log.Debug("Zones: {0}", zones.Dump());
 
-        var tracker = new HaDeviceTracker(mqttClient, "CAR_LOCATION", haDevice)
+        var tracker = new HaDeviceTracker(mqttClient, "Location", haDevice)
         {
           Lat = currentCarLocation.Latitude.ToDouble(),
           Lon = currentCarLocation.Longitude.ToDouble(),
@@ -100,7 +100,7 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
         await tracker.Announce();
         await tracker.PublishState();
 
-        var compactDetails = vehicle.Details.Compact("car");
+        var compactDetails = vehicle.Details.Compact("500e");
         var unitSystem = await haClient.GetUnitSystem();
 
         Log.Information("Using unit system: {0}", unitSystem.Dump());
@@ -118,14 +118,12 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
 
             compactDetails.TryGetValue(unitKey, out var tmpUnit);
 
-            if (tmpUnit == "km")
-            {
-              sensor.DeviceClass = "distance";
-
-            }
-
             switch (tmpUnit)
             {
+              case "km":
+                sensor.DeviceClass = "distance";
+                sensor.Unit = "km";
+                break;
               case "volts":
                 sensor.DeviceClass = "voltage";
                 sensor.Unit = "V";
@@ -139,20 +137,21 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
             }
           }
 
+          if (detail.Key.EndsWith("evInfo_battery_stateOfCharge"))
+          {
+              sensor.DeviceClass = "battery";
+              sensor.Unit = "%";
+          }
+
+          if (detail.Key.Contains("evInfo_battery_timeToFullyChargeL"))
+          {
+              sensor.DeviceClass = "duration";
+              sensor.Unit = "min";
+          }
+
           return sensor;
         }).ToDictionary(k => k.Name, v => v);
-
-        if (sensors.TryGetValue("car_evInfo_battery_stateOfCharge", out var stateOfChargeSensor))
-        {
-          stateOfChargeSensor.DeviceClass = "battery";
-          stateOfChargeSensor.Unit = "%";
-        }
-
-        if (sensors.TryGetValue("car_evInfo_battery_timeToFullyChargeL2", out var timeToFullyChargeSensor))
-        {
-          timeToFullyChargeSensor.DeviceClass = "duration";
-          timeToFullyChargeSensor.Unit = "min";
-        }
+       
 
         Log.Debug("Announce sensors: {0}", sensors.Dump());
         Log.Information("Pushing new sensors and values to Home Assistant");
@@ -164,7 +163,7 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
 
         await Parallel.ForEachAsync(sensors.Values, async (sensor, token) => { await sensor.PublishState(); });
 
-        var lastUpdate = new HaSensor(mqttClient, "LAST_UPDATE", haDevice)
+        var lastUpdate = new HaSensor(mqttClient, "Last Update", haDevice)
         {
           Value = DateTime.Now.ToString("O"),
           DeviceClass = "timestamp"
