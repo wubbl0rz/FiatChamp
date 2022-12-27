@@ -217,8 +217,6 @@ public class HaSensor : HaEntity
   public override async Task Announce()
   {
 
-    Log.Information($"{_binary} {_name}");
-
     if (_binary)
     {
 
