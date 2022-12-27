@@ -126,13 +126,6 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
 
             }
 
-          if (detail.Key.Contains("scheduledDays")
-          || detail.Key.Contains("plugInStatus")
-          )
-          {
-            binary = true;
-          }
-
           var sensor = new HaSensor(mqttClient, detail.Key, haDevice,binary)
           {
             Value = detail.Value
