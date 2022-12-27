@@ -200,9 +200,10 @@ public class HaSensor : HaEntity
   private readonly string _configTopic;
   private readonly bool _binary;
 
-  public HaSensor(SimpleMqttClient mqttClient, string name, HaDevice haDevice, bool binary = false) : base(mqttClient, name, haDevice)
+  public HaSensor(SimpleMqttClient mqttClient, string name, HaDevice haDevice, bool binary) : base(mqttClient, name, haDevice)
   {
     _binary = binary;
+  
     var typeSensor = $"{(_binary ? "binary_sensor" : "sensor")}";
     _stateTopic = $"homeassistant/{typeSensor}/{_id}/state";
     _configTopic = $"homeassistant/{typeSensor}/{_id}/config";
@@ -216,8 +217,11 @@ public class HaSensor : HaEntity
   public override async Task Announce()
   {
 
+    Log.Information($"{_binary} {_name}");
+
     if (_binary)
     {
+
         await _mqttClient.Pub(_configTopic, $$""" 
             {
               "device":{
