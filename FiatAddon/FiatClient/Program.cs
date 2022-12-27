@@ -75,16 +75,6 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
       {
         Log.Information("FOUND CAR: {0}", vehicle.Vin);
 
-        if (appConfig.AutoRefreshBattery)
-        {
-          await TrySendCommand(fiatClient, FiatCommand.DEEPREFRESH, vehicle.Vin);
-        }
-
-        if (appConfig.AutoRefreshLocation)
-        {
-          await TrySendCommand(fiatClient, FiatCommand.VF, vehicle.Vin);
-        }
-
         await Task.Delay(TimeSpan.FromSeconds(10), ctx.CancellationToken);
 
         var vehicleName = string.IsNullOrEmpty(vehicle.Nickname) ? "Car" : vehicle.Nickname;
@@ -123,10 +113,6 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
 
         Log.Information("Using unit system: {0}", unitSystem.Dump());
 
-        var shouldConvertKmToMiles = (appConfig.ConvertKmToMiles || unitSystem.Length != "km");
-
-        Log.Information("Convert km -> miles ? {0}", shouldConvertKmToMiles);
-
         var sensors = compactDetails.Select(detail =>
         {
           var sensor = new HaSensor(mqttClient, detail.Key, haDevice)
@@ -144,12 +130,6 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
             {
               sensor.DeviceClass = "distance";
 
-              if (shouldConvertKmToMiles && int.TryParse(detail.Value, out var kmValue))
-              {
-                var miValue = Math.Round(kmValue * 0.62137, 2);
-                sensor.Value = miValue.ToString(CultureInfo.InvariantCulture);
-                tmpUnit = "mi";
-              }
             }
 
             switch (tmpUnit)
