@@ -24,7 +24,7 @@ jobs:
         dotnet-version: 7.0.x
     - name: build_release
       run: |
-        cd FiatChampAddon/FiatClient
+        cd FiatAddon/FiatClient
         dotnet publish -r ${{ matrix.rid }} --configuration Release --self-contained -o build/
     - name: docker_login
       uses: docker/login-action@v2.0.0
@@ -37,4 +37,4 @@ jobs:
       with:
         args: |
           --${{ matrix.arch }} \
-          --target FiatChampAddon
+          --target FiatAddon
