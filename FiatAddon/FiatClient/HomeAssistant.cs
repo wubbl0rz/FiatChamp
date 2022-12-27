@@ -217,6 +217,9 @@ public class HaSensor : HaEntity
   public override async Task Announce()
   {
 
+      var deviceClassJson =
+        string.IsNullOrWhiteSpace(this.DeviceClass) ? "" : $"\"device_class\":\"{this.DeviceClass}\"," ;
+
     if (_binary)
     {
 
@@ -231,6 +234,7 @@ public class HaSensor : HaEntity
               "name":"{{ _name }}",
               "payload_off": false,
               "payload_on": true,
+              {{ deviceClassJson }}
               "state_topic":"{{ _stateTopic }}",
               "unique_id":"{{ _id }}",
               "platform":"mqtt"
@@ -242,8 +246,7 @@ public class HaSensor : HaEntity
     {
       var unitOfMeasurementJson =
       string.IsNullOrWhiteSpace(this.Unit) ? "" : $"\"unit_of_measurement\":\"{this.Unit}\",";
-      var deviceClassJson =
-        string.IsNullOrWhiteSpace(this.DeviceClass) ? "" : $"\"device_class\":\"{this.DeviceClass}\"," ;
+
       var iconJson =
         string.IsNullOrWhiteSpace(this.DeviceClass) ? $"\"icon\":\"{this.Icon}\"," : "" ;
 
