@@ -126,7 +126,7 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
           if (key.Contains("chargingstatus"))
           {
               binary = true;
-              if (detail.Value == "NOT_CHARGING")
+              if (detail.Value == "CHARGING")
               {
                 value = "True";
               }
