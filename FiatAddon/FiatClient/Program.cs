@@ -109,7 +109,7 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
         {
 
           bool binary = false;
-          if (detail.Key.Contains("scheduleddays"))
+          if (detail.Key.Contains("scheduledDays"))
           {
             binary = true;
             Log.Information($"==>> {detail.Key}");
