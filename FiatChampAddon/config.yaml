@@ -1,4 +1,4 @@
-name: "FiatChamp"
+name: "FiatUconnect"
 url: "https://github.com/AirBeeSee/FiatUconnect"
 description: "Connect your FIAT (uconnect) car to Home Assistant. 🚗"
 services:
