@@ -252,13 +252,6 @@ async Task<bool> TrySendCommand(IFiatClient fiatClient, FiatCommand command, str
 
   var pin = appConfig.FiatPin;
 
-  if (command.IsDangerous && !appConfig.EnableDangerousCommands)
-  {
-    Log.Warning("{0} not sent. " +
-                "Set \"EnableDangerousCommands\" option if you want to use it. ", command.Message);
-    return false;
-  }
-
   try
   {
     await fiatClient.SendCommand(vin, command.Message, pin, command.Action);
