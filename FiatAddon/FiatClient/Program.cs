@@ -83,7 +83,7 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
                 await Task.Delay(TimeSpan.FromSeconds(5), ctx.CancellationToken);
                 await Parallel.ForEachAsync(haEntities, async (sensor, token) => { await sensor.PublishState(); });
 
-                var lastUpdate = new HaSensor(mqttClient, "500e_LastUpdate", haDevice, false) { Value = DateTime.Now.ToString("%d/%m %H:%M:%S"), DeviceClass = "" };
+                var lastUpdate = new HaSensor(mqttClient, "500e_LastUpdate", haDevice, false) { Value = DateTime.Now.ToString("%d/%M %H:%m:%s"), DeviceClass = "" };
                 await lastUpdate.Announce();
                 await lastUpdate.PublishState();
 
@@ -333,8 +333,9 @@ IEnumerable<HaEntity> GetSensors(SimpleMqttClient mqttClient, Vehicle vehicle, H
 
         if (detail.Key.EndsWith("_timestamp", StringComparison.InvariantCultureIgnoreCase))
         {
-            value = DateTimeOffset.FromUnixTimeMilliseconds(Convert.ToInt64(detail.Value)).UtcDateTime.ToString("O");
-            deviceClass = "timestamp";
+            //value = DateTimeOffset.FromUnixTimeMilliseconds(Convert.ToInt64(detail.Value)).UtcDateTime.ToString("O");
+            value = DateTimeOffset.FromUnixTimeMilliseconds(Convert.ToInt64(detail.Value)).UtcDateTime.ToString("%d/%M %H:%m:%s");
+            deviceClass = "duration";
         }
 
         var sensor = new HaSensor(mqttClient, detail.Key, haDevice, binary)
