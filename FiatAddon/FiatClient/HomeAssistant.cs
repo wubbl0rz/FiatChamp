@@ -218,7 +218,7 @@ public class HaSensor : HaEntity
     {
 
         var deviceClassJson = string.IsNullOrWhiteSpace(this.DeviceClass) ? "" : $"\"device_class\":\"{this.DeviceClass}\",";
-        var iconJson = string.IsNullOrWhiteSpace(this.DeviceClass) ? $"\"icon\":\"mdi:eye\"," : "";
+        var iconJson = !_binary && string.IsNullOrWhiteSpace(this.DeviceClass) ? $"\"icon\":\"mdi:eye\"," : "";
         var unitOfMeasurementJson = _binary || string.IsNullOrWhiteSpace(this.Unit) ? "" : $"\"unit_of_measurement\":\"{this.Unit}\",";
         var payloadJson = _binary ? $"\"payload_off\": false, \"payload_on\": true," : "";
 
