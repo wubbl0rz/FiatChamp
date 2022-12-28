@@ -157,7 +157,7 @@ async Task<bool> TrySendCommand(IFiatClient fiatClient, FiatCommand command, str
 IEnumerable<HaEntity> CreateInteractiveEntities(CoconaAppContext ctx, IFiatClient fiatClient, SimpleMqttClient mqttClient, Vehicle vehicle,
   HaDevice haDevice)
 {
-    var updateLocationButton = new HaButton(mqttClient, "UpdateLocation", haDevice, async button =>
+    var updateLocationButton = new HaButton(mqttClient, "500e_UpdateLocation", haDevice, async button =>
     {
         if (await TrySendCommand(fiatClient, FiatCommand.VF, vehicle.Vin))
         {
@@ -166,7 +166,7 @@ IEnumerable<HaEntity> CreateInteractiveEntities(CoconaAppContext ctx, IFiatClien
         }
     });
 
-    var deepRefreshButton = new HaButton(mqttClient, "DeepRefresh", haDevice, async button =>
+    var deepRefreshButton = new HaButton(mqttClient, "500e_DeepRefresh", haDevice, async button =>
     {
         if (await TrySendCommand(fiatClient, FiatCommand.DEEPREFRESH, vehicle.Vin))
         {
@@ -175,7 +175,7 @@ IEnumerable<HaEntity> CreateInteractiveEntities(CoconaAppContext ctx, IFiatClien
         }
     });
 
-    var lightsButton = new HaButton(mqttClient, "Light", haDevice, async button =>
+    var lightsButton = new HaButton(mqttClient, "500e_Light", haDevice, async button =>
     {
         if (await TrySendCommand(fiatClient, FiatCommand.ROLIGHTS, vehicle.Vin))
         {
@@ -183,7 +183,7 @@ IEnumerable<HaEntity> CreateInteractiveEntities(CoconaAppContext ctx, IFiatClien
         }
     });
 
-    var chargeNowButton = new HaButton(mqttClient, "ChargeNOW", haDevice, async button =>
+    var chargeNowButton = new HaButton(mqttClient, "500e_ChargeNOW", haDevice, async button =>
     {
         if (await TrySendCommand(fiatClient, FiatCommand.CNOW, vehicle.Vin))
         {
@@ -193,7 +193,7 @@ IEnumerable<HaEntity> CreateInteractiveEntities(CoconaAppContext ctx, IFiatClien
 
 
 
-    var hvacButton = new HaButton(mqttClient, "HVAC", haDevice, async button =>
+    var hvacButton = new HaButton(mqttClient, "500e_HVAC", haDevice, async button =>
     {
         if (await TrySendCommand(fiatClient, FiatCommand.ROPRECOND, vehicle.Vin))
         {
@@ -202,7 +202,7 @@ IEnumerable<HaEntity> CreateInteractiveEntities(CoconaAppContext ctx, IFiatClien
     });
 
 
-    var lockButton = new HaButton(mqttClient, "DoorLock", haDevice, async button =>
+    var lockButton = new HaButton(mqttClient, "500e_DoorLock", haDevice, async button =>
     {
         if (await TrySendCommand(fiatClient, FiatCommand.RDL, vehicle.Vin))
         {
@@ -210,7 +210,7 @@ IEnumerable<HaEntity> CreateInteractiveEntities(CoconaAppContext ctx, IFiatClien
         }
     });
 
-    var unLockButton = new HaButton(mqttClient, "DoorUnLock", haDevice, async button =>
+    var unLockButton = new HaButton(mqttClient, "500e_DoorUnLock", haDevice, async button =>
     {
         if (await TrySendCommand(fiatClient, FiatCommand.RDU, vehicle.Vin))
         {
