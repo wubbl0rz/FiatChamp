@@ -325,7 +325,7 @@ Dictionary<string, HaSensor> GetSensors(SimpleMqttClient mqttClient, Vehicle veh
 
         if (detail.Key.EndsWith("_timestamp", StringComparison.InvariantCultureIgnoreCase))
         {
-            value = DateTimeOffset.FromUnixTimeMilliseconds(Convert.ToInt64(detail.Value)).DateTime.ToString("O");
+            value = DateTimeOffset.FromUnixTimeMilliseconds(Convert.ToInt64(detail.Value)).UtcDateTime.ToString("O");
             deviceClass = "timestamp";
         }
 
