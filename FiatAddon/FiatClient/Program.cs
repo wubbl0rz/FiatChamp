@@ -83,7 +83,7 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
                 await Task.Delay(TimeSpan.FromSeconds(5), ctx.CancellationToken);
                 await Parallel.ForEachAsync(haEntities, async (sensor, token) => { await sensor.PublishState(); });
 
-                var lastUpdate = new HaSensor(mqttClient, "500e_LastUpdate", haDevice, false) { Value = DateTime.Now.ToString("%d/%M %H:%m:%s"), DeviceClass = "duration" };
+                var lastUpdate = new HaSensor(mqttClient, "500e_LastUpdate", haDevice, false) { Value = DateTime.Now.ToString("dd/MM HH:mm:ss"), DeviceClass = "duration" };
                 await lastUpdate.Announce();
                 await lastUpdate.PublishState();
 
@@ -161,7 +161,7 @@ IEnumerable<HaEntity> CreateInteractiveEntities(CoconaAppContext ctx, IFiatClien
     {
         if (await TrySendCommand(fiatClient, FiatCommand.VF, vehicle.Vin))
         {
-            await Task.Delay(TimeSpan.FromSeconds(8), ctx.CancellationToken);
+            await Task.Delay(TimeSpan.FromSeconds(3), ctx.CancellationToken);
             forceLoopResetEvent.Set();
         }
     });
@@ -170,7 +170,7 @@ IEnumerable<HaEntity> CreateInteractiveEntities(CoconaAppContext ctx, IFiatClien
     {
         if (await TrySendCommand(fiatClient, FiatCommand.DEEPREFRESH, vehicle.Vin))
         {
-            await Task.Delay(TimeSpan.FromSeconds(8), ctx.CancellationToken);
+            await Task.Delay(TimeSpan.FromSeconds(3), ctx.CancellationToken);
             forceLoopResetEvent.Set();
         }
     });
@@ -265,7 +265,7 @@ async Task<IEnumerable<HaEntity>> GetLocations(HaRestApi haClient, SimpleMqttCli
 
 string GetLocalTime(long timeStamp)
 {
-    return DateTimeOffset.FromUnixTimeMilliseconds(timeStamp).UtcDateTime.ToLocalTime().ToString("%d/%M %H:%m:%s");
+    return DateTimeOffset.FromUnixTimeMilliseconds(timeStamp).UtcDateTime.ToLocalTime().ToString("dd/MM HH:mm:ss");
 }
 
 IEnumerable<HaEntity> GetSensors(SimpleMqttClient mqttClient, Vehicle vehicle, HaDevice haDevice)

@@ -3,7 +3,7 @@ url: "https://github.com/AirBeeSee/FiatUconnect"
 description: "Connect your FIAT (uconnect) car to Home Assistant. 🚗"
 services:
     - "mqtt:want"
-version: "5.0.33"
+version: "5.0.34"
 homeassistant_api: true
 image: "ghcr.io/airbeesee/image-{arch}-fiat-uconnect"
 slug: "fiat_uconnect"
