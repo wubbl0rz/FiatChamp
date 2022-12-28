@@ -252,7 +252,7 @@ static async Task<IEnumerable<HaEntity>> GetLocations(HaRestApi haClient, Simple
 
     var trackerTimeStamp = new HaSensor(mqttClient, "500e_Location_TimeStamp", haDevice, false)
     {
-        Value = DateTimeOffset.FromUnixTimeMilliseconds(Convert.ToInt64(vehicle.Location.TimeStamp)).LocalDateTime.ToString("%dd/%MM %HH:%mm:%ss"),
+        Value = DateTimeOffset.FromUnixTimeMilliseconds(Convert.ToInt64(vehicle.Location.TimeStamp)).UtcDateTime.ToLocalTime().ToString("%d/%M %H:%m:%s"),
         DeviceClass = "duration"
     };
 
@@ -333,7 +333,6 @@ IEnumerable<HaEntity> GetSensors(SimpleMqttClient mqttClient, Vehicle vehicle, H
 
         if (detail.Key.EndsWith("_timestamp", StringComparison.InvariantCultureIgnoreCase))
         {
-            //value = DateTimeOffset.FromUnixTimeMilliseconds(Convert.ToInt64(detail.Value)).UtcDateTime.ToString("O");
             value = DateTimeOffset.FromUnixTimeMilliseconds(Convert.ToInt64(detail.Value)).DateTime.ToString("%d/%M %H:%m:%s");
             deviceClass = "duration";
         }
