@@ -41,7 +41,7 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
     Log.Information("{0}", appConfig.ToStringWithoutSecrets());
     Log.Debug("{0}", appConfig.Dump());
 
-    IFiatClient fiatClient = new FiatClient(appConfig.FiatUser, appConfig.FiatPw);
+    FiatClient fiatClient = new FiatClient(appConfig.FiatUser, appConfig.FiatPw);
 
     var mqttClient = new SimpleMqttClient(appConfig.MqttServer, appConfig.MqttPort, appConfig.MqttUser, appConfig.MqttPw, "FiatUconnect");
 
@@ -61,7 +61,7 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
             {
                 Log.Information($"Found : {vehicle.Nickname} {vehicle.Vin}");
 
-                await Task.Delay(TimeSpan.FromSeconds(10), ctx.CancellationToken);
+                //await Task.Delay(TimeSpan.FromSeconds(5), ctx.CancellationToken);
 
                 var haDevice = new HaDevice()
                 {
@@ -80,7 +80,7 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
                 Log.Information("Pushing new sensors and values to Home Assistant");
                 await Parallel.ForEachAsync(haEntities, async (sensor, token) => { await sensor.Announce(); });
                 Log.Debug("Waiting for home assistant to process all sensors");
-                await Task.Delay(TimeSpan.FromSeconds(5), ctx.CancellationToken);
+                //await Task.Delay(TimeSpan.FromSeconds(5), ctx.CancellationToken);
                 await Parallel.ForEachAsync(haEntities, async (sensor, token) => { await sensor.PublishState(); });
 
                 var lastUpdate = new HaSensor(mqttClient, "500e_LastUpdate", haDevice, false) { Value = DateTime.Now.ToString("dd/MM HH:mm:ss"), DeviceClass = "duration" };
@@ -125,7 +125,7 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
     }
 });
 
-async Task<bool> TrySendCommand(IFiatClient fiatClient, FiatCommand command, string vin)
+async Task<bool> TrySendCommand(FiatClient fiatClient, FiatCommand command, string vin)
 {
     Log.Information("SEND COMMAND {0}: ", command.Message);
 
@@ -154,14 +154,14 @@ async Task<bool> TrySendCommand(IFiatClient fiatClient, FiatCommand command, str
 
 
 
-IEnumerable<HaEntity> CreateInteractiveEntities(CoconaAppContext ctx, IFiatClient fiatClient, SimpleMqttClient mqttClient, Vehicle vehicle,
+IEnumerable<HaEntity> CreateInteractiveEntities(CoconaAppContext ctx, FiatClient fiatClient, SimpleMqttClient mqttClient, Vehicle vehicle,
   HaDevice haDevice)
 {
     var updateLocationButton = new HaButton(mqttClient, "500e_UpdateLocation", haDevice, async button =>
     {
         if (await TrySendCommand(fiatClient, FiatCommand.VF, vehicle.Vin))
         {
-            await Task.Delay(TimeSpan.FromSeconds(5), ctx.CancellationToken);
+            await Task.Delay(TimeSpan.FromSeconds(10), ctx.CancellationToken);
             forceLoopResetEvent.Set();
         }
     });
@@ -170,7 +170,7 @@ IEnumerable<HaEntity> CreateInteractiveEntities(CoconaAppContext ctx, IFiatClien
     {
         if (await TrySendCommand(fiatClient, FiatCommand.DEEPREFRESH, vehicle.Vin))
         {
-            await Task.Delay(TimeSpan.FromSeconds(5), ctx.CancellationToken);
+            await Task.Delay(TimeSpan.FromSeconds(10), ctx.CancellationToken);
             forceLoopResetEvent.Set();
         }
     });

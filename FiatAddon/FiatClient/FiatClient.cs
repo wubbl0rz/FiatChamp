@@ -10,16 +10,9 @@ using Serilog;
 
 namespace FiatUconnect;
 
-public interface IFiatClient
-{
-  Task LoginAndKeepSessionAlive();
-  Task SendCommand(string vin, string command, string pin, string action);
-  Task<Vehicle[]> Fetch();
-}
 
 
-
-public class FiatClient : IFiatClient
+public class FiatClient 
 {
   private readonly string _loginApiKey = "3_mOx_J2dRgjXYCdyhchv3b5lhi54eBcdCTX4BI8MORqmZCoQWhA0mV2PTlptLGUQI";
   private readonly string _apiKey = "2wGyL6PHec9o1UeLPYpoYa1SkEWqeBur9bLsi24i";
