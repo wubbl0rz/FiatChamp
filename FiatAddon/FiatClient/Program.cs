@@ -346,7 +346,7 @@ IEnumerable<HaEntity> GetSensors(SimpleMqttClient mqttClient, Vehicle vehicle, H
     };
 
     return sensor;
-  }).Where(s => !s.Name.EndsWith("_xunit", StringComparison.InvariantCultureIgnoreCase)).ToArray();
+  }).Where(s => !s.Name.EndsWith("_unit", StringComparison.InvariantCultureIgnoreCase)).ToArray();
 
   Log.Debug("Announce sensors: {0}", sensors.Dump());
 
