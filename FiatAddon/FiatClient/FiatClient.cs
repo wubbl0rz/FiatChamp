@@ -65,7 +65,7 @@ public class FiatClient : IFiatClient
       {
         try
         {
-          Log.Information("REFRESH SESSION");
+          Log.Information("Refresh Session");
           await this.Login();
         }
         catch (Exception e)
