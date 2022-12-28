@@ -7,6 +7,7 @@ using FiatUconnect.HA;
 using Flurl.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json.Linq;
 using Serilog;
 using Serilog.Events;
 
@@ -45,7 +46,7 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
     var mqttClient = new SimpleMqttClient(appConfig.MqttServer, appConfig.MqttPort, appConfig.MqttUser, appConfig.MqttPw, "FiatUconnect");
 
     await mqttClient.Connect();
-    
+
     while (!ctx.CancellationToken.IsCancellationRequested)
     {
         Log.Information("Now fetching new data...");
@@ -71,48 +72,23 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
                     Version = "1.0"
                 };
 
-                var currentCarLocation = new Coordinate(vehicle.Location.Latitude, vehicle.Location.Longitude);
+                IEnumerable<HaEntity> location = await GetLocations(haClient, mqttClient, vehicle, haDevice);
+                IEnumerable<HaEntity> sensors = GetSensors(mqttClient, vehicle, haDevice);
 
-                var zones = await haClient.GetZonesAscending(currentCarLocation);
+                IEnumerable<HaEntity> haEntities = location.Concat(sensors).ToArray();
 
-                Log.Debug("Zones: {0}", zones.Dump());
-
-                var tracker = new HaDeviceTracker(mqttClient, "500e_Location", haDevice)
-                {
-                    Lat = currentCarLocation.Latitude.ToDouble(),
-                    Lon = currentCarLocation.Longitude.ToDouble(),
-                    StateValue = zones.FirstOrDefault()?.FriendlyName ?? "Away"
-                };
-
-                Log.Debug("Announce sensor: {0}", tracker.Dump());
-
-                await tracker.Announce();
-                await tracker.PublishState();
-
-                Dictionary<string, HaSensor> sensors = GetSensors(mqttClient, vehicle, haDevice);
-
-                Log.Debug("Announce sensors: {0}", sensors.Dump());
                 Log.Information("Pushing new sensors and values to Home Assistant");
-
-                await Parallel.ForEachAsync(sensors.Values, async (sensor, token) => { await sensor.Announce(); });
-
+                await Parallel.ForEachAsync(haEntities, async (sensor, token) => { await sensor.Announce(); });
                 Log.Debug("Waiting for home assistant to process all sensors");
                 await Task.Delay(TimeSpan.FromSeconds(5), ctx.CancellationToken);
+                await Parallel.ForEachAsync(haEntities, async (sensor, token) => { await sensor.PublishState(); });
 
-                await Parallel.ForEachAsync(sensors.Values, async (sensor, token) => { await sensor.PublishState(); });
-
-                var lastUpdate = new HaSensor(mqttClient, "500e_LastUpdate", haDevice, false)
-                {
-                    Value = DateTime.Now.ToString("O"),
-                    DeviceClass = "timestamp"
-                };
-
+                var lastUpdate = new HaSensor(mqttClient, "500e_LastUpdate", haDevice, false) { Value = DateTime.Now.ToString("O"), DeviceClass = "timestamp" };
                 await lastUpdate.Announce();
                 await lastUpdate.PublishState();
 
-                var haEntities = persistentHaEntities.GetOrAdd(vehicle.Vin, s => CreateInteractiveEntities(ctx, fiatClient, mqttClient, vehicle, haDevice));
-
-                foreach (var haEntity in haEntities)
+                var haInteractiveEntities = persistentHaEntities.GetOrAdd(vehicle.Vin, s => CreateInteractiveEntities(ctx, fiatClient, mqttClient, vehicle, haDevice));
+                foreach (var haEntity in haInteractiveEntities)
                 {
                     Log.Debug("Announce sensor: {0}", haEntity.Dump());
                     await haEntity.Announce();
@@ -255,7 +231,39 @@ IEnumerable<HaEntity> CreateInteractiveEntities(CoconaAppContext ctx, IFiatClien
     };
 }
 
-Dictionary<string, HaSensor> GetSensors(SimpleMqttClient mqttClient, Vehicle vehicle, HaDevice haDevice)
+static async Task<IEnumerable<HaEntity>> GetLocations(HaRestApi haClient, SimpleMqttClient mqttClient, Vehicle vehicle, HaDevice haDevice)
+{
+    List<HaEntity> haEntities = new List<HaEntity>();
+
+    var currentCarLocation = new Coordinate(vehicle.Location.Latitude, vehicle.Location.Longitude);
+
+    var zones = await haClient.GetZonesAscending(currentCarLocation);
+
+    Log.Debug("Zones: {0}", zones.Dump());
+
+    var tracker = new HaDeviceTracker(mqttClient, "500e_Location", haDevice)
+    {
+        Lat = currentCarLocation.Latitude.ToDouble(),
+        Lon = currentCarLocation.Longitude.ToDouble(),
+        StateValue = zones.FirstOrDefault()?.FriendlyName ?? "Away"
+    };
+
+    haEntities.Add(tracker);
+
+    var trackerTimeStamp = new HaSensor(mqttClient, "500e_Location_TimeStamp", haDevice, false)
+    {
+        Value = DateTimeOffset.FromUnixTimeMilliseconds(Convert.ToInt64(vehicle.Location.TimeStamp)).UtcDateTime.ToString("O"),
+        DeviceClass = "timestamp"
+    };
+
+    haEntities.Add(trackerTimeStamp);
+
+    Log.Debug("Announce sensor: {0}", haEntities.Dump());
+
+    return haEntities;
+}
+
+IEnumerable<HaEntity> GetSensors(SimpleMqttClient mqttClient, Vehicle vehicle, HaDevice haDevice)
 {
     var compactDetails = vehicle.Details.Compact("500e");
 
@@ -339,5 +347,9 @@ Dictionary<string, HaSensor> GetSensors(SimpleMqttClient mqttClient, Vehicle veh
 
         return sensor;
     }).ToDictionary(k => k.Name, v => v);
-    return sensors;
+
+    Log.Debug("Announce sensors: {0}", sensors.Dump());
+
+    return sensors.Values.ToArray();
 }
+
