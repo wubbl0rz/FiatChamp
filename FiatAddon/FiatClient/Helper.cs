@@ -11,82 +11,86 @@ namespace FiatUconnect;
 
 public static class Helper
 {
-  public static Dictionary<string, string> Compact(this JToken container, string key = "root", Dictionary<string, string>? result = null)
-  {
-    if (result == null)
+    public static Dictionary<string, string> Compact(this JToken container, string key = "root", Dictionary<string, string>? result = null)
     {
-      result = new Dictionary<string, string>();
+        if (result == null) { result = new Dictionary<string, string>(); }
+
+        switch (container)
+        {
+            case JValue value:
+                result.Add(key, value.Value?.ToString() ?? "null");
+                break;
+            case JArray array:
+                {
+                    for (int i = 0; i < array.Count(); i++)
+                    {
+                        var token = array[i];
+                        token.Compact($"{key}_array_{i}", result);
+                    }
+
+                    break;
+                }
+
+            case JObject obj:
+                {
+                    foreach (var kv in obj)
+                    {
+                        kv.Value.Compact($"{key}_{kv.Key}", result);
+                    }
+
+                    break;
+                }
+        }
+
+        return result;
     }
-  
-    if (container is JValue value)
+
+    public static IFlurlRequest AwsSign(this IFlurlRequest request, ImmutableCredentials credentials,
+      RegionEndpoint regionEndpoint, object? data = null)
     {
-      result.Add(key, value.Value?.ToString() ?? "null");
-    }
-    else if(container is JArray array)
-    {
-      for (int i = 0; i < array.Count(); i++)
-      {
-        var token = array[i];
-        Compact(token, $"{key}_array_{i}", result);
-      }
-    }
-    else if (container is JObject obj)
-    {
-      foreach (var kv in obj)
-      {
-        Compact(kv.Value, $"{key}_{kv.Key}", result);
-      }
+        request.BeforeCall(call =>
+        {
+            var json = data == null ? "" : JsonConvert.SerializeObject(data);
+            call.HttpRequestMessage.Content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            Signer.Sign(call.HttpRequestMessage,
+          null, new List<KeyValuePair<string, IEnumerable<string>>>(),
+          DateTime.Now, regionEndpoint.SystemName, "execute-api", credentials);
+        });
+
+        return request;
     }
 
-    return result;
-  }
-
-  public static IFlurlRequest AwsSign(this IFlurlRequest request, ImmutableCredentials credentials,
-    RegionEndpoint regionEndpoint, object? data = null)
-  {
-    request.BeforeCall(call =>
+    public static string Dump(this object? o)
     {
-      var json = data == null ? "" : JsonConvert.SerializeObject(data);
-      call.HttpRequestMessage.Content = new StringContent(json, Encoding.UTF8, "application/json");
-
-      Signer.Sign(call.HttpRequestMessage,
-        null, new List<KeyValuePair<string, IEnumerable<string>>>(),
-        DateTime.Now, regionEndpoint.SystemName, "execute-api", credentials);
-    });
-
-    return request;
-  }
-
-  public static string Dump(this object? o)
-  {
-    try
-    {
-      var result = o;
-      if (o is Task task)
-      {
-        task.Wait();
-        result = (object)((dynamic)task).Result;
-      }
-
-      if (result is string str)
-      {
         try
         {
-          var json = JObject.Parse(str);
-          return json.ToString(Formatting.Indented);
+            var result = o;
+            if (o is Task task)
+            {
+                task.Wait();
+                result = (object)((dynamic)task).Result;
+            }
+
+            if (result is string str)
+            {
+                try
+                {
+                    var json = JObject.Parse(str);
+                    return json.ToString(Formatting.Indented);
+                }
+                catch (Exception)
+                {
+                    return str;
+                }
+            }
+
+            return JsonConvert.SerializeObject(result, Formatting.Indented);
+
         }
-        catch (Exception e)
+        catch (Exception)
         {
-          return str;
+            return o?.GetType().ToString() ?? "null";
         }
-      }
-
-      return JsonConvert.SerializeObject(result, Formatting.Indented);
-
     }
-    catch (Exception)
-    {
-      return o?.GetType().ToString() ?? "null";
-    }
-  }
 }
