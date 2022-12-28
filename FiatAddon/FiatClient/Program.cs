@@ -1,4 +1,4 @@
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Globalization;
 using Cocona;
 using CoordinateSharp;
@@ -83,7 +83,7 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
                 await Task.Delay(TimeSpan.FromSeconds(5), ctx.CancellationToken);
                 await Parallel.ForEachAsync(haEntities, async (sensor, token) => { await sensor.PublishState(); });
 
-                var lastUpdate = new HaSensor(mqttClient, "500e_LastUpdate", haDevice, false) { Value = DateTime.Now.ToString("O"), DeviceClass = "timestamp" };
+                var lastUpdate = new HaSensor(mqttClient, "500e_LastUpdate", haDevice, false) { Value = DateTime.Now.ToString("%d/%m %H:%M:%S"), DeviceClass = "" };
                 await lastUpdate.Announce();
                 await lastUpdate.PublishState();
 
