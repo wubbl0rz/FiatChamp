@@ -161,7 +161,7 @@ IEnumerable<HaEntity> CreateInteractiveEntities(CoconaAppContext ctx, IFiatClien
     {
         if (await TrySendCommand(fiatClient, FiatCommand.VF, vehicle.Vin))
         {
-            await Task.Delay(TimeSpan.FromSeconds(3), ctx.CancellationToken);
+            await Task.Delay(TimeSpan.FromSeconds(5), ctx.CancellationToken);
             forceLoopResetEvent.Set();
         }
     });
@@ -170,7 +170,7 @@ IEnumerable<HaEntity> CreateInteractiveEntities(CoconaAppContext ctx, IFiatClien
     {
         if (await TrySendCommand(fiatClient, FiatCommand.DEEPREFRESH, vehicle.Vin))
         {
-            await Task.Delay(TimeSpan.FromSeconds(3), ctx.CancellationToken);
+            await Task.Delay(TimeSpan.FromSeconds(5), ctx.CancellationToken);
             forceLoopResetEvent.Set();
         }
     });
