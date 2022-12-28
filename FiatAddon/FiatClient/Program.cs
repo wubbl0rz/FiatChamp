@@ -135,6 +135,10 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
                 value = "False";
               }
           }
+          if (key.EndsWith("_timestamp"))
+          {
+            value = DateTimeOffset.FromUnixTimeMilliseconds(Convert.ToInt64(detail.Value)).ToString("%d/%M %H:%m:%s");
+          }
 
           var sensor = new HaSensor(mqttClient, detail.Key, haDevice,binary)
           {
