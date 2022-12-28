@@ -61,7 +61,7 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
             {
                 Log.Information($"Found : {vehicle.Nickname} {vehicle.Vin}");
 
-                await Task.Delay(TimeSpan.FromSeconds(5), ctx.CancellationToken);
+                await Task.Delay(TimeSpan.FromSeconds(10), ctx.CancellationToken);
 
                 var haDevice = new HaDevice()
                 {
@@ -83,7 +83,7 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
                 await Task.Delay(TimeSpan.FromSeconds(5), ctx.CancellationToken);
                 await Parallel.ForEachAsync(haEntities, async (sensor, token) => { await sensor.PublishState(); });
 
-                var lastUpdate = new HaSensor(mqttClient, "500e_LastUpdate", haDevice, false) { Value = DateTime.Now.ToString("%d/%M %H:%m:%s"), DeviceClass = "" };
+                var lastUpdate = new HaSensor(mqttClient, "500e_LastUpdate", haDevice, false) { Value = DateTime.Now.ToString("%d/%M %H:%m:%s"), DeviceClass = "duration" };
                 await lastUpdate.Announce();
                 await lastUpdate.PublishState();
 
@@ -161,7 +161,7 @@ IEnumerable<HaEntity> CreateInteractiveEntities(CoconaAppContext ctx, IFiatClien
     {
         if (await TrySendCommand(fiatClient, FiatCommand.VF, vehicle.Vin))
         {
-            await Task.Delay(TimeSpan.FromSeconds(3), ctx.CancellationToken);
+            await Task.Delay(TimeSpan.FromSeconds(8), ctx.CancellationToken);
             forceLoopResetEvent.Set();
         }
     });
@@ -170,7 +170,7 @@ IEnumerable<HaEntity> CreateInteractiveEntities(CoconaAppContext ctx, IFiatClien
     {
         if (await TrySendCommand(fiatClient, FiatCommand.DEEPREFRESH, vehicle.Vin))
         {
-            await Task.Delay(TimeSpan.FromSeconds(3), ctx.CancellationToken);
+            await Task.Delay(TimeSpan.FromSeconds(8), ctx.CancellationToken);
             forceLoopResetEvent.Set();
         }
     });
@@ -252,8 +252,8 @@ static async Task<IEnumerable<HaEntity>> GetLocations(HaRestApi haClient, Simple
 
     var trackerTimeStamp = new HaSensor(mqttClient, "500e_Location_TimeStamp", haDevice, false)
     {
-        Value = DateTimeOffset.FromUnixTimeMilliseconds(Convert.ToInt64(vehicle.Location.TimeStamp)).UtcDateTime.ToString("O"),
-        DeviceClass = "timestamp"
+        Value = DateTimeOffset.FromUnixTimeMilliseconds(Convert.ToInt64(vehicle.Location.TimeStamp)).LocalDateTime.ToString("%dd/%MM %HH:%mm:%ss"),
+        DeviceClass = "duration"
     };
 
     haEntities.Add(trackerTimeStamp);
@@ -334,7 +334,7 @@ IEnumerable<HaEntity> GetSensors(SimpleMqttClient mqttClient, Vehicle vehicle, H
         if (detail.Key.EndsWith("_timestamp", StringComparison.InvariantCultureIgnoreCase))
         {
             //value = DateTimeOffset.FromUnixTimeMilliseconds(Convert.ToInt64(detail.Value)).UtcDateTime.ToString("O");
-            value = DateTimeOffset.FromUnixTimeMilliseconds(Convert.ToInt64(detail.Value)).UtcDateTime.ToString("%d/%M %H:%m:%s");
+            value = DateTimeOffset.FromUnixTimeMilliseconds(Convert.ToInt64(detail.Value)).DateTime.ToString("%d/%M %H:%m:%s");
             deviceClass = "duration";
         }
 
