@@ -26,14 +26,14 @@ public class SimpleMqttClient
     _useTls = useTls;
     _mqttClient = new MqttFactory().CreateManagedMqttClient();
   }
-  
+
   public async Task Connect()
   {
     var mqttClientOptions = new MqttClientOptionsBuilder()
       .WithCleanSession()
       .WithClientId(_clientId)
       .WithTcpServer(_server, _port);
-    
+
     if (string.IsNullOrWhiteSpace(_user) || string.IsNullOrWhiteSpace(_pass))
     {
       Log.Warning("Mqtt User/Password is EMPTY.");
@@ -54,18 +54,19 @@ public class SimpleMqttClient
       .Build();
 
     await _mqttClient.StartAsync(options);
-    
+
     _mqttClient.ConnectedAsync += async args =>
     {
-      Log.Information("Mqtt connection successful");
+      await Task.Run(() => Log.Information("Mqtt connection successful"));
     };
 
     _mqttClient.ConnectingFailedAsync += async args =>
     {
-      Log.Information("Mqtt connection failed: {0}", args.Exception);
+      await Task.Run(() => Log.Information("Mqtt connection failed: {0}", args.Exception));
+     
     };
   }
-  
+
   public async Task Sub(string topic, Func<string, Task> callback)
   {
     _mqttClient.ApplicationMessageReceivedAsync += async args =>
@@ -87,7 +88,7 @@ public class SimpleMqttClient
 
     await _mqttClient.SubscribeAsync(topic);
   }
-  
+
   public async Task Pub(string topic, string payload)
   {
     await _mqttClient.EnqueueAsync(topic, payload, retain: true);

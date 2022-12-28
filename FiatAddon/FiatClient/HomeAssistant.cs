@@ -7,19 +7,6 @@ using Serilog;
 
 namespace FiatUconnect.HA;
 
-public class HaRestApiUnitSystem
-{
-    public string Length { get; set; }
-    public string Mass { get; set; }
-    public string Pressure { get; set; }
-    public string Temperature { get; set; }
-    public string Volume { get; set; }
-    [JsonProperty("wind_speed")] public string WindSpeed { get; set; }
-
-    [JsonProperty("accumulated_precipitation")]
-    public string AccumulatedPrecipitation { get; set; }
-}
-
 public class HaRestApiEntityState
 {
     [JsonProperty("entity_id")] public string EntityId { get; set; } = null!;
@@ -54,33 +41,7 @@ public class HaRestApi
         _token = token;
     }
 
-    public HaRestApi(string token)
-    {
-        _token = token;
-    }
-
-    private async Task<JObject> GetConfig()
-    {
-        return await _url
-          .WithOAuthBearerToken(_token)
-          .AppendPathSegment("config")
-          .GetJsonAsync<JObject>();
-    }
-
-    public async Task<string> GetTimeZone()
-    {
-        var config = await this.GetConfig();
-
-        return config["time_zone"].ToString();
-    }
-
-    public async Task<HaRestApiUnitSystem> GetUnitSystem()
-    {
-        var config = await this.GetConfig();
-
-        return config["unit_system"].ToObject<HaRestApiUnitSystem>();
-    }
-
+    
     public async Task<IReadOnlyList<HaRestApiZone>> GetZones()
     {
         var states = await this.GetStates();
@@ -141,7 +102,7 @@ public class HaDeviceTracker : HaEntity
 
     public double Lat { get; set; }
     public double Lon { get; set; }
-    public string StateValue { get; set; }
+    public string StateValue { get; set; } = "None";
 
     public HaDeviceTracker(SimpleMqttClient mqttClient, string name, HaDevice haDevice)
       : base(mqttClient, name, haDevice)
@@ -349,9 +310,9 @@ public class HaSwitch : HaEntity
 
 public class HaDevice
 {
-    public string Name { get; set; }
-    public string Manufacturer { get; set; }
-    public string Model { get; set; }
-    public string Version { get; set; }
-    public string Identifier { get; set; }
+    public string Name { get; set; } = "";
+    public string Manufacturer { get; set; }= "";
+    public string Model { get; set; }= "";
+    public string Version { get; set; }= "";
+    public string Identifier { get; set; }= "";
 }
