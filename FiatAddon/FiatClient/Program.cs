@@ -218,6 +218,11 @@ IEnumerable<HaEntity> CreateInteractiveEntities(CoconaAppContext ctx, IFiatClien
         }
     });
 
+    var fetchNowButton = new HaButton(mqttClient, "500e_FetchNow", haDevice, async button =>
+    {
+       await Task.Run(() => forceLoopResetEvent.Set());
+    });
+
 
     return new HaEntity[]
     {
@@ -228,6 +233,7 @@ IEnumerable<HaEntity> CreateInteractiveEntities(CoconaAppContext ctx, IFiatClien
     updateLocationButton,
     lockButton,
     unLockButton,
+    fetchNowButton
     };
 }
 
