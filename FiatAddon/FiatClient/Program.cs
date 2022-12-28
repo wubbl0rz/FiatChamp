@@ -231,7 +231,7 @@ IEnumerable<HaEntity> CreateInteractiveEntities(CoconaAppContext ctx, IFiatClien
     };
 }
 
-static async Task<IEnumerable<HaEntity>> GetLocations(HaRestApi haClient, SimpleMqttClient mqttClient, Vehicle vehicle, HaDevice haDevice)
+async Task<IEnumerable<HaEntity>> GetLocations(HaRestApi haClient, SimpleMqttClient mqttClient, Vehicle vehicle, HaDevice haDevice)
 {
     List<HaEntity> haEntities = new List<HaEntity>();
 
@@ -252,7 +252,7 @@ static async Task<IEnumerable<HaEntity>> GetLocations(HaRestApi haClient, Simple
 
     var trackerTimeStamp = new HaSensor(mqttClient, "500e_Location_TimeStamp", haDevice, false)
     {
-        Value = DateTimeOffset.FromUnixTimeMilliseconds(Convert.ToInt64(vehicle.Location.TimeStamp)).UtcDateTime.ToLocalTime().ToString("%d/%M %H:%m:%s"),
+        Value = GetLocalTime(vehicle.Location.TimeStamp),
         DeviceClass = "duration"
     };
 
@@ -261,6 +261,11 @@ static async Task<IEnumerable<HaEntity>> GetLocations(HaRestApi haClient, Simple
     Log.Debug("Announce sensor: {0}", haEntities.Dump());
 
     return haEntities;
+}
+
+string GetLocalTime(long timeStamp)
+{
+    return DateTimeOffset.FromUnixTimeMilliseconds(timeStamp).UtcDateTime.ToLocalTime().ToString("%d/%M %H:%m:%s");
 }
 
 IEnumerable<HaEntity> GetSensors(SimpleMqttClient mqttClient, Vehicle vehicle, HaDevice haDevice)
@@ -333,7 +338,7 @@ IEnumerable<HaEntity> GetSensors(SimpleMqttClient mqttClient, Vehicle vehicle, H
 
         if (detail.Key.EndsWith("_timestamp", StringComparison.InvariantCultureIgnoreCase))
         {
-            value = DateTimeOffset.FromUnixTimeMilliseconds(Convert.ToInt64(detail.Value)).DateTime.ToString("%d/%M %H:%m:%s");
+            value = GetLocalTime(Convert.ToInt64(detail.Value));
             deviceClass = "duration";
         }
 
