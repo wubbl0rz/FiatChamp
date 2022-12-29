@@ -75,9 +75,8 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
 
                 IEnumerable<HaEntity> haEntities = await GetHaEntities(haClient, mqttClient, vehicle, haDevice);
 
-                if (!persistentHaEntities.TryAdd(vehicle.Vin,DateTime.Now))
+                if (persistentHaEntities.TryAdd(vehicle.Vin,DateTime.Now))
                 {
-
                     Log.Information("Pushing new sensors to Home Assistant");
                     await Parallel.ForEachAsync(haEntities, async (sensor, token) => { await sensor.Announce(); });
 
