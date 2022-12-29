@@ -62,8 +62,6 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
             {
                 Log.Information($"Found : {vehicle.Nickname} {vehicle.Vin}");
 
-                //await Task.Delay(TimeSpan.FromSeconds(5), ctx.CancellationToken);
-
                 var haDevice = new HaDevice()
                 {
                     Name = string.IsNullOrEmpty(vehicle.Nickname) ? "Fiat" : vehicle.Nickname,
@@ -211,6 +209,7 @@ IEnumerable<HaEntity> CreateInteractiveEntities(CoconaAppContext ctx, FiatClient
 
     var fetchNowButton = new HaButton(mqttClient, "500e_FetchNow", haDevice, async button =>
     {
+        Log.Information($"Force Fetch Now");
         await Task.Run(() => forceLoopResetEvent.Set());
     });
 
