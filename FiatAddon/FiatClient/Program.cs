@@ -22,7 +22,8 @@ builder.Services.AddOptions<AppConfig>()
 
 var app = builder.Build();
 
-var persistentHaEntities = new ConcurrentDictionary<string, IEnumerable<HaEntity>>();
+var persistentHaEntities = new ConcurrentDictionary<string, DateTime>();
+
 var appConfig = builder.Configuration.Get<AppConfig>();
 var forceLoopResetEvent = new AutoResetEvent(false);
 var haClient = new HaRestApi(appConfig.HomeAssistantUrl, appConfig.SupervisorToken);
@@ -74,23 +75,23 @@ await app.RunAsync(async (CoconaAppContext ctx) =>
 
                 IEnumerable<HaEntity> haEntities = await GetHaEntities(haClient, mqttClient, vehicle, haDevice);
 
-                Log.Information("Pushing new sensors and values to Home Assistant");
-                await Parallel.ForEachAsync(haEntities, async (sensor, token) => { await sensor.Announce(); });
-                //Log.Debug("Waiting for home assistant to process all sensors");
-                //await Task.Delay(TimeSpan.FromSeconds(5), ctx.CancellationToken);
+                if (!persistentHaEntities.TryAdd(vehicle.Vin,DateTime.Now))
+                {
+
+                    Log.Information("Pushing new sensors to Home Assistant");
+                    await Parallel.ForEachAsync(haEntities, async (sensor, token) => { await sensor.Announce(); });
+
+                    Log.Information("Pushing new buttons to Home Assistant");
+                    var haInteractiveEntities = CreateInteractiveEntities(ctx, fiatClient, mqttClient, vehicle, haDevice);
+                    await Parallel.ForEachAsync(haInteractiveEntities, async (button, token) => { await button.Announce(); });
+                }
+
+                Log.Information("Pushing sensors values to Home Assistant");
                 await Parallel.ForEachAsync(haEntities, async (sensor, token) => { await sensor.PublishState(); });
 
                 var lastUpdate = new HaSensor(mqttClient, "500e_LastUpdate", haDevice, false) { Value = DateTime.Now.ToString("dd/MM HH:mm:ss"), DeviceClass = "duration" };
                 await lastUpdate.Announce();
                 await lastUpdate.PublishState();
-
-                var haInteractiveEntities = persistentHaEntities.GetOrAdd(vehicle.Vin, s => CreateInteractiveEntities(ctx, fiatClient, mqttClient, vehicle, haDevice));
-                Log.Information("Announce InteractiveEntities to Home Assistant");
-                foreach (var haEntity in haInteractiveEntities)
-                {
-                    Log.Debug("Announce sensor: {0}", haEntity.Dump());
-                    await haEntity.Announce();
-                }
             }
         }
         catch (FlurlHttpException httpException)
@@ -214,23 +215,15 @@ IEnumerable<HaEntity> CreateInteractiveEntities(CoconaAppContext ctx, FiatClient
         await Task.Run(() => forceLoopResetEvent.Set());
     });
 
-    return new HaEntity[]
-    {
-    hvacButton,
-    chargeNowButton,
-    deepRefreshButton,
-    lightsButton,
-    updateLocationButton,
-    lockButton,
-    unLockButton,
-    fetchNowButton
-    };
+    var haEntities = new HaEntity[] { hvacButton, chargeNowButton, deepRefreshButton, lightsButton, updateLocationButton, lockButton, unLockButton, fetchNowButton };
+
+    Log.Debug("Announce haEntities : {0}", haEntities.Dump());
+
+    return haEntities;
 }
 
 async Task<IEnumerable<HaEntity>> GetHaEntities(HaRestApi haClient, SimpleMqttClient mqttClient, Vehicle vehicle, HaDevice haDevice)
 {
-
-
     var compactDetails = vehicle.Details.Compact("500e");
 
     bool charging = false;
