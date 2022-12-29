@@ -353,7 +353,7 @@ async Task<IEnumerable<HaEntity>> GetHaEntities(HaRestApi haClient, SimpleMqttCl
 
     haEntities.Add(new HaSensor(mqttClient, "500e_Charge_Endtime", haDevice, false)
     {
-        DeviceClass = "timestamp",
+        DeviceClass = "duration",
         Value = textChargeEndTime,
     });
 
