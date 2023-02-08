@@ -327,7 +327,7 @@ async Task<IEnumerable<HaEntity>> GetHaEntities(HaRestApi haClient, SimpleMqttCl
            return sensor as HaEntity;
        }).ToList();
 
-    var textChargeDuration = "";
+    var textChargeDuration = "0";
     var textChargeEndTime = "";
     if (charging)
     {
@@ -358,7 +358,7 @@ async Task<IEnumerable<HaEntity>> GetHaEntities(HaRestApi haClient, SimpleMqttCl
     {
         Lat = currentCarLocation.Latitude.ToDouble(),
         Lon = currentCarLocation.Longitude.ToDouble(),
-        StateValue = zones.FirstOrDefault()?.FriendlyName ?? "Away"
+      //  StateValue = zones.FirstOrDefault()?.FriendlyName ?? "Away"
     };
 
     haEntities.Add(tracker);
