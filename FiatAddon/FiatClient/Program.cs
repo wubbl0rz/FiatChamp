@@ -328,7 +328,7 @@ async Task<IEnumerable<HaEntity>> GetHaEntities(HaRestApi haClient, SimpleMqttCl
        }).ToList();
 
     var textChargeDuration = "0";
-    var textChargeEndTime = "";
+    var textChargeEndTime = "00:00";
     if (charging)
     {
         var chargeDuration = Convert.ToInt32(haEntities.OfType<HaSensor>().Single(s => s.Name.EndsWith(charginglevel, StringComparison.InvariantCultureIgnoreCase)).Value);
