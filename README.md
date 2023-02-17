@@ -37,9 +37,9 @@
 
 Connect your FIAT, Jeep, Ram, Dodge, Alfa Romeo car or truck to Home Assistant by having a uconnect-enabled vehicle and a valid account.
 
-### **1.1 Car model status**
+### **1.1 Car brand status**
 
-| Model      | Status          |
+| Brand      | Status          |
 | ---------- | --------------- |
 | Fiat       | ✅ Works        |
 | Jeep       | ✅ Works        |
