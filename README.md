@@ -16,6 +16,7 @@
 
 1. [🔭 Overview](#🔭-1-overview)
    1. [Car model status](#11-car-model-status)
+   2. [Screenshots](#12-screenshots)
 2. [🧩 Features](#🧩-2-features)
 3. [📝 Requirements](#📝-3-requirements)
 4. [🚫 Limitations](#🚫-4-limitations)
@@ -32,7 +33,7 @@
 
 ## **🔭 1. Overview**
 
-    ⚠️ I have developed this addon specifically for my Fiat Icon 500e, and it is currently the only car that I am able to test it with. As a work in progress, please expect to encounter a few bugs with other models.
+> ⚠️ I have developed this addon specifically for my Fiat Icon 500e, and it is currently the only car that I am able to test it with. As a work in progress, please expect to encounter a few bugs with other models.
 
 Connect your FIAT, Jeep, Ram, Dodge, Alfa Romeo car or truck to Home Assistant by having a uconnect-enabled vehicle and a valid account.
 
@@ -46,7 +47,7 @@ Connect your FIAT, Jeep, Ram, Dodge, Alfa Romeo car or truck to Home Assistant b
 | Dodge      | ❓ Unknown      |
 | Alfa Romeo | ❓ Unknown      |
 
-### Example dashboard using sensors and entities provided by this addon:
+### **1.2. Screenshots**
 
 ![](./assets/hass-dashboard.jpg)
 
@@ -72,7 +73,7 @@ Connect your FIAT, Jeep, Ram, Dodge, Alfa Romeo car or truck to Home Assistant b
 
 ## **📝 3. Requirements**
 
-- For optimal performance, we recommend using the Official Home Assistant MQTT Addon, which can be configured to run either as an internal service or with an external MQTT broker. If you choose to use an external broker, it must be connected to the Home Assistant MQTT integration for seamless communication.
+For optimal performance, we recommend using the Official Home Assistant MQTT Addon, which can be configured to run either as an internal service or with an external MQTT broker. If you choose to use an external broker, it must be connected to the Home Assistant MQTT integration for seamless communication.
 
 Please note that there are different uconnect services available, so it's important to ensure that your car is compatible with one of the following uconnect sites. Please be aware that older vehicles that only use mopar.com may not be supported.
 
@@ -86,11 +87,11 @@ Please note that there are different uconnect services available, so it's import
 
 ### **4.1. What doesn't work (yet)?**
 
-- Eco Reports (statistics). I could not find any API yet. The official app shows it so in theory it should be accessible.
+- [ ] Eco Reports (statistics). I could not find any API yet. The official app shows it so in theory it should be accessible.
 
 ### **4.2. What will never work?**
 
-- While I have been unable to locate an API for Eco Reports (statistics), it should theoretically be accessible since the official app is capable of displaying it.
+- [ ] While I have been unable to locate an API for Eco Reports (statistics), it should theoretically be accessible since the official app is capable of displaying it.
 
 ## **🛠️ 5. Installation**
 
