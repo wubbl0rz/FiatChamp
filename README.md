@@ -4,7 +4,7 @@
 
 <div align="center" width="100%">
     <h1>FiatChamp</h1>
-    <p>Home assistant integration for FIAT, Jeep, Ram, Dodge and Alfa Romeo.</p>
+    <p>Home Assistant integration for FIAT, Jeep, Ram, Dodge and Alfa Romeo.</p>
     <a target="_blank" href="https://github.com/wubbl0rz/FiatChamp/stargazers"><img src="https://img.shields.io/github/stars/wubbl0rz/FiatChamp" /></a>
     <a target="_blank" href="https://github.com/wubbl0rz/FiatChamp/tags"><img src="https://img.shields.io/github/v/tag/wubbl0rz/FiatChamp" /></a>
     <a target="_blank" href="https://github.com/wubbl0rz/FiatChamp/actions"><img src="https://img.shields.io/github/actions/workflow/status/wubbl0rz/FiatChamp/dotnet.yml" /></a>
@@ -20,8 +20,8 @@
 2. [🧩 Features](#🧩-2-features)
 3. [📝 Requirements](#📝-3-requirements)
 4. [🚫 Limitations](#🚫-4-limitations)
-   1. [What doesn't work (yet)](#41-what-doesnt-work-yet)
-   2. [What will never work](#42-what-will-never-work)
+   1. [What doesn't work (yet)?](#41-what-doesnt-work-yet)
+   2. [What will never work?](#42-what-will-never-work)
 5. [🛠️ Installation](#🛠️-5-installation)
    1. [Home Assistant OS or Supervised](#51-home-assistant-os-or-supervised)
    2. [Standalone (NOT RECOMMENDED)](#52-standalone-not-recommended)
