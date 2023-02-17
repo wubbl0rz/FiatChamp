@@ -15,7 +15,7 @@
 ## **📜 Legend**
 
 1. [🔭 Overview](#🔭-1-overview)
-   1. [Car model status](#11-car-model-status)
+   1. [Car brand status](#11-car-brand-status)
    2. [Screenshots](#12-screenshots)
 2. [🧩 Features](#🧩-2-features)
 3. [📝 Requirements](#📝-3-requirements)
