@@ -333,7 +333,7 @@ public class FiatClient : IFiatClient
       _tokenUrl = "https://authz.sdpr-02.fcagcv.com/v2/cognito/identity/token";
       _apiUrl = "https://channels.sdpr-02.fcagcv.com";
       _authApiKey = "JWRYW7IYhW9v0RqDghQSx4UcRYRILNmc8zAuh5ys"; // UNKNOWN
-      _authUrl = "https://mfa.fcl-01.fcagcv.com"; // UNKNOWN
+      _authUrl = "https://mfa.fcl-02.fcagcv.com"; // UNKNOWN
       _awsEndpoint = RegionEndpoint.USEast1;
       _locale = "en_us";
     }
