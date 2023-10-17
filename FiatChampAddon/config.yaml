@@ -1,11 +1,11 @@
 name: "FiatChamp"
-url: "https://github.com/TheTechNetwork/FiatChamp"
+url: "https://github.com/thetechnetwork/FiatChamp"
 description: "Connect your FIAT (uconnect) car to Home Assistant. 🚗"
 services:
     - "mqtt:want"
 version: "3.0.8"
 homeassistant_api: true
-image: "ghcr.io/TheTechNetwork/image-{arch}-fiat-champ"
+image: "ghcr.io/thetechnetwork/image-{arch}-fiat-champ"
 slug: "fiat_champ"
 init: false
 discovery: 
