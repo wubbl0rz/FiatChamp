@@ -4,15 +4,15 @@ on:
   push:
     branches: 
       - release
-      - fix
+      - dev
 
 jobs:
   build:
     strategy:
       matrix:
         include:
-          - arch: "armv7"
-            rid: "linux-musl-arm"
+ #         - arch: "armv7"
+ #           rid: "linux-musl-arm"
           - arch: "amd64"
             rid: "linux-musl-x64"
     runs-on: ubuntu-latest
@@ -36,7 +36,7 @@ jobs:
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
     - name: create_image
-      uses: home-assistant/builder@2022.09.0
+      uses: home-assistant/builder@2023.09.0
       with:
         args: |
           --${{ matrix.arch }} \
