@@ -10,6 +10,6 @@ RUN chmod a+x /run.sh
 
 COPY FiatClient/build/ /build/.
 
-LABEL org.opencontainers.image.source https://github.com/TheTechNetwork/FiatChamp
+LABEL org.opencontainers.image.source https://github.com/thetechnetwork/FiatChamp
 
 CMD [ "/run.sh" ]
