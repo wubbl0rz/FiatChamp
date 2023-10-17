@@ -5,7 +5,7 @@ services:
     - "mqtt:want"
 version: "3.0.8"
 homeassistant_api: true
-image: "ghcr.io/wubbl0rz/image-{arch}-fiat-champ"
+image: "ghcr.io/TheTechNetwork/image-{arch}-fiat-champ"
 slug: "fiat_champ"
 init: false
 discovery: 
