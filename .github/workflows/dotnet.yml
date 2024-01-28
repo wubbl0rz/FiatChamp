@@ -2,7 +2,7 @@ name: .NET
 
 on:
   push:
-    branches: 
+    branches:
       - release
       - dev
 
@@ -11,12 +11,14 @@ jobs:
     strategy:
       matrix:
         include:
- #         - arch: "armv7"
- #           rid: "linux-musl-arm"
+         - arch: "aarch64"
+           rid: "linux-musl-arm64"
+         - arch: "armv7"
+           rid: "linux-musl-arm"
           - arch: "amd64"
             rid: "linux-musl-x64"
     runs-on: ubuntu-latest
-    permissions: 
+    permissions:
       packages: write
     steps:
     - name: checkout
@@ -36,7 +38,7 @@ jobs:
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
     - name: create_image
-      uses: home-assistant/builder@2023.09.0
+      uses: home-assistant/builder@2024.01.0
       with:
         args: |
           --${{ matrix.arch }} \
